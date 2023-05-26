@@ -11,9 +11,6 @@ import com.vesoft.nebula.client.graph.net.NebulaPool;
 import io.github.anyzm.graph.ocean.annotation.GraphEdge;
 import io.github.anyzm.graph.ocean.annotation.GraphProperty;
 import io.github.anyzm.graph.ocean.annotation.GraphVertex;
-import io.github.anyzm.graph.ocean.domain.VertexQuery;
-import io.github.anyzm.graph.ocean.domain.impl.QueryResult;
-import io.github.anyzm.graph.ocean.engine.NebulaVertexQuery;
 import io.github.anyzm.graph.ocean.enums.GraphDataTypeEnum;
 import io.github.anyzm.graph.ocean.enums.GraphKeyPolicy;
 import io.github.anyzm.graph.ocean.enums.GraphPropertyTypeEnum;
@@ -40,13 +37,13 @@ public class GraphOceanExample {
 
     private static int nebulaPoolTimeout = 300000;
 
-    private static String nebulaCluster = "10.220.193.183:9669";
+    private static String nebulaCluster = "192.168.50.234:9669";
 
     private static String userName = "root";
 
-    private static String password = "nebula";
+    private static String password = "shunan@123";
 
-    private static String space = "test";
+    private static String space = "basketballplayer";
 
     public static NebulaPoolConfig nebulaPoolConfig() {
         NebulaPoolConfig nebulaPoolConfig = new NebulaPoolConfig();
@@ -89,24 +86,50 @@ public class GraphOceanExample {
     public static void main(String[] args) throws UnknownHostException, UnsupportedEncodingException, IllegalAccessException, InstantiationException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException {
         NebulaGraphMapper nebulaGraphMapper = nebulaGraphMapper(nebulaPoolSessionManager(
                 nebulaPool(nebulaPoolConfig())));
-        User user = new User("UR123", "张三");
-        //保存顶点
-        int i = nebulaGraphMapper.saveVertexEntities(Lists.newArrayList(user));
-        //查询顶点
-        List<User> users = nebulaGraphMapper.fetchVertexTag(User.class, "UR123");
-        //保存边和查询边类似
-        Follow follow = new Follow("UR123", "UR234", 1);
-        //保存边
-        nebulaGraphMapper.saveEdgeEntities(Lists.newArrayList(follow));
-        //查询出边
-        List<Follow> follows = nebulaGraphMapper.goOutEdge(Follow.class, "UR123");
-        //查询反向边
-        List<Follow> fans = nebulaGraphMapper.goReverseEdge(Follow.class, "UR123");
-        //查询API
-        VertexQuery queryUserName = NebulaVertexQuery.build().fetchPropOn(User.class, "UR123")
-                .yield(User.class,"userName");
-        QueryResult rows = nebulaGraphMapper.executeQuery(queryUserName);
-        System.out.println(rows);
+        Player player = new Player("player001", "Chen ChangLong", 22);
+        System.out.println(nebulaGraphMapper.saveVertexEntities(Lists.newArrayList(player)));
+//        User user = new User("UR123", "张三");
+//        //保存顶点
+//        int i = nebulaGraphMapper.saveVertexEntities(Lists.newArrayList(user));
+//        //查询顶点
+//        List<User> users = nebulaGraphMapper.fetchVertexTag(User.class, "UR123");
+//        //保存边和查询边类似
+//        Follow follow = new Follow("UR123", "UR234", 1);
+//        //保存边
+//        nebulaGraphMapper.saveEdgeEntities(Lists.newArrayList(follow));
+//        //查询出边
+//        List<Follow> follows = nebulaGraphMapper.goOutEdge(Follow.class, "UR123");
+//        //查询反向边
+//        List<Follow> fans = nebulaGraphMapper.goReverseEdge(Follow.class, "UR123");
+//        //查询API
+//        VertexQuery queryUserName = NebulaVertexQuery.build().fetchPropOn(User.class, "UR123")
+//                .yield(User.class,"userName");
+//        QueryResult rows = nebulaGraphMapper.executeQuery(queryUserName);
+//        System.out.println(rows);
+    }
+
+    @GraphVertex(value = "player", keyPolicy = GraphKeyPolicy.hash, idAsField = false)
+    @Data
+    public static class Player {
+        @GraphProperty(value = "player_no", required = true,
+                propertyTypeEnum = GraphPropertyTypeEnum.GRAPH_VERTEX_ID)
+        private String playerNo;
+
+        @GraphProperty(value = "name", dataType = GraphDataTypeEnum.STRING)
+        private String playerName;
+
+        @GraphProperty(value = "age", dataType = GraphDataTypeEnum.INT)
+        private Integer playerAge;
+
+        public Player(String playerNo) {
+            this.playerNo = playerNo;
+        }
+
+        public Player(String playerNo, String playerName, Integer playerAge) {
+            this.playerNo = playerNo;
+            this.playerName = playerName;
+            this.playerAge = playerAge;
+        }
     }
 
     @GraphVertex(value = "user", keyPolicy = GraphKeyPolicy.string_key)
