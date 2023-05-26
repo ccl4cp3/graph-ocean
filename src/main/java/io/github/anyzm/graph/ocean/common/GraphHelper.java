@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -62,10 +63,15 @@ public class GraphHelper {
     }
 
     private static String generateKeyPolicy(GraphKeyPolicy graphKeyPolicy, String vertexIdKey) {
-        if (graphKeyPolicy.equals(GraphKeyPolicy.string_key)) {
-            return String.format(STRING_ID_TEMPLATE, graphKeyPolicy.getKeyWrapWord(), vertexIdKey);
-        } else {
-            return String.format(ENDPOINT_TEMPLATE, graphKeyPolicy.getKeyWrapWord(), vertexIdKey);
+        switch (graphKeyPolicy) {
+            case string_key:
+                return String.format(STRING_ID_TEMPLATE, graphKeyPolicy.getKeyWrapWord(), vertexIdKey);
+            case hash:
+                return String.format(ENDPOINT_TEMPLATE, graphKeyPolicy.getKeyWrapWord(), vertexIdKey);
+            case uuid:
+                return UUID.randomUUID().toString();
+            default:
+                return null;
         }
     }
 

@@ -21,7 +21,7 @@ public enum GraphPropertyTypeEnum {
      */
     GRAPH_EDGE_DST_ID,
     /**
-     * 边顶点id
+     * 顶点id
      */
     GRAPH_VERTEX_ID,
     /**

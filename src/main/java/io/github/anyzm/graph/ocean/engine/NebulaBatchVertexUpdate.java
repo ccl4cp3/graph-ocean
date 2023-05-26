@@ -5,6 +5,7 @@
  */
 package io.github.anyzm.graph.ocean.engine;
 
+import com.google.common.collect.Lists;
 import io.github.anyzm.graph.ocean.common.GraphHelper;
 import io.github.anyzm.graph.ocean.common.utils.StringUtil;
 import io.github.anyzm.graph.ocean.dao.VertexUpdateEngine;
@@ -15,7 +16,6 @@ import io.github.anyzm.graph.ocean.enums.ErrorEnum;
 import io.github.anyzm.graph.ocean.enums.GraphDataTypeEnum;
 import io.github.anyzm.graph.ocean.exception.CheckThrower;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
-import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
@@ -30,7 +30,7 @@ import java.util.Set;
  */
 public class NebulaBatchVertexUpdate<T> implements VertexUpdateEngine {
 
-    private static final String VERTEX_UPSET_SQL = "UPSERT VERTEX %s SET %s";
+    private static final String VERTEX_UPSET_SQL = "UPSERT VERTEX ON %s %s SET %s";
 
     private List<GraphVertexEntity<T>> graphVertexEntities;
 
@@ -81,9 +81,8 @@ public class NebulaBatchVertexUpdate<T> implements VertexUpdateEngine {
             }
         }
         String sqlSet = builder.delete(0, 1).toString();
-        return String.format(VERTEX_UPSET_SQL, queryId, sqlSet);
+        return String.format(VERTEX_UPSET_SQL, this.graphVertexType.getVertexName(), queryId, sqlSet);
     }
-
 
     @Override
     public List<GraphVertexEntity<T>> getGraphVertexEntityList() {
