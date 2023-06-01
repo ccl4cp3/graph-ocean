@@ -5,6 +5,7 @@
  */
 package io.github.anyzm.graph.ocean.engine;
 
+import com.google.common.collect.Lists;
 import io.github.anyzm.graph.ocean.common.GraphHelper;
 import io.github.anyzm.graph.ocean.common.utils.StringUtil;
 import io.github.anyzm.graph.ocean.dao.EdgeUpdateEngine;
@@ -17,7 +18,6 @@ import io.github.anyzm.graph.ocean.enums.ErrorEnum;
 import io.github.anyzm.graph.ocean.enums.GraphDataTypeEnum;
 import io.github.anyzm.graph.ocean.exception.CheckThrower;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
-import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.Collections;
@@ -137,7 +137,11 @@ public class NebulaBatchEdgesUpdate<S, T, E> implements EdgeUpdateEngine<S, T, E
         Map<String, GraphDataTypeEnum> dataTypeMap = graphEdgeEntity.getGraphEdgeType().getDataTypeMap();
         for (Map.Entry<String, Object> entry : entries) {
             GraphDataTypeEnum graphDataTypeEnum = dataTypeMap.get(entry.getKey());
-            if (GraphDataTypeEnum.STRING.equals(graphDataTypeEnum)) {
+            if(null == graphDataTypeEnum || GraphDataTypeEnum.NULL.equals(graphDataTypeEnum)) {
+                continue;
+            }
+
+            if (GraphDataTypeEnum.STRING == graphDataTypeEnum || GraphDataTypeEnum.FIXED_STRING == graphDataTypeEnum) {
                 sqlBuilder.append(",").append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
             } else {
                 sqlBuilder.append(",").append(entry.getKey()).append("=").append(entry.getValue());
