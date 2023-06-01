@@ -48,4 +48,9 @@ public @interface GraphEdge {
      */
     boolean dstIdAsField() default true;
 
+    /**
+     * 用于创建edge
+     * @return 注释信息
+     */
+    String comment() default "";
 }

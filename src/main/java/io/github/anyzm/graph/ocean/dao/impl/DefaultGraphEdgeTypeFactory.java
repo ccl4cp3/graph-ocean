@@ -13,12 +13,8 @@ import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeType;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeTypeBuilder;
 import io.github.anyzm.graph.ocean.domain.impl.GraphVertexType;
 import io.github.anyzm.graph.ocean.enums.ErrorEnum;
-import io.github.anyzm.graph.ocean.enums.GraphDataTypeEnum;
 import io.github.anyzm.graph.ocean.exception.CheckThrower;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
-import com.google.common.collect.Maps;
-
-import java.util.Map;
 
 /**
  * Description  DefaultGraphEdgeTypeFactory is used for
@@ -44,13 +40,12 @@ public class DefaultGraphEdgeTypeFactory implements GraphEdgeTypeFactory {
     @Override
     public <S, T, E> GraphEdgeType<S, T, E> buildGraphEdgeType(Class<E> clazz, GraphVertexType<S> srcGraphVertexType,
                                                                GraphVertexType<T> dstGraphVertexType) throws NebulaException {
-        GraphEdge graphEdge = (GraphEdge) clazz.getAnnotation(GraphEdge.class);
+        GraphEdge graphEdge = clazz.getAnnotation(GraphEdge.class);
         CheckThrower.ifTrueThrow(graphEdge == null, ErrorEnum.PARAMETER_NOT_NULL);
         String edgeName = graphEdge.value();
+        String edgeComment = graphEdge.comment();
         boolean srcIdAsField = graphEdge.srcIdAsField();
         boolean dstIdAsField = graphEdge.dstIdAsField();
-        //字段类型
-        Map<String, GraphDataTypeEnum> dataTypeMap = Maps.newHashMap();
         if (srcGraphVertexType == null) {
             Class<S> srcVertex = graphEdge.srcVertex();
             srcGraphVertexType = graphVertexTypeFactory.buildGraphVertexType(srcVertex);
@@ -60,9 +55,17 @@ public class DefaultGraphEdgeTypeFactory implements GraphEdgeTypeFactory {
             dstGraphVertexType = graphVertexTypeFactory.buildGraphVertexType(dstVertex);
         }
         CheckThrower.ifTrueThrow(srcGraphVertexType == null || dstGraphVertexType == null, ErrorEnum.INVALID_VERTEX_TAG);
+
         GraphEdgeTypeBuilder builder = GraphEdgeTypeBuilder.builder();
         GraphHelper.collectGraphProperties(builder, clazz, srcIdAsField, dstIdAsField);
-        return builder.srcIdAsField(srcIdAsField).dstIdAsField(dstIdAsField).graphLabelName(edgeName)
-                .labelClass(clazz).srcGraphVertexType(srcGraphVertexType).dstGraphVertexType(dstGraphVertexType).build();
+        return builder
+                .srcIdAsField(srcIdAsField)
+                .dstIdAsField(dstIdAsField)
+                .graphLabelName(edgeName)
+                .graphLabelComment(edgeComment)
+                .labelClass(clazz)
+                .srcGraphVertexType(srcGraphVertexType)
+                .dstGraphVertexType(dstGraphVertexType)
+                .build();
     }
 }

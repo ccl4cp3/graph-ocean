@@ -53,4 +53,15 @@ public @interface GraphProperty {
      */
     Class<? extends GraphValueFormatter> formatter() default GraphValueFormatter.class;
 
+    /**
+     * 用于创建属性
+     * @return 注释信息
+     */
+    String comment() default "";
+
+    /**
+     * 默认值
+     * @return
+     */
+    String defaultValue() default "";
 }

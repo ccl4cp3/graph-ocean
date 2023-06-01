@@ -5,6 +5,7 @@
  */
 package io.github.anyzm.graph.ocean.dao.impl;
 
+import com.google.common.collect.Maps;
 import io.github.anyzm.graph.ocean.annotation.GraphProperty;
 import io.github.anyzm.graph.ocean.common.GraphHelper;
 import io.github.anyzm.graph.ocean.dao.GraphTypeManager;
@@ -15,7 +16,6 @@ import io.github.anyzm.graph.ocean.enums.ErrorEnum;
 import io.github.anyzm.graph.ocean.enums.GraphPropertyTypeEnum;
 import io.github.anyzm.graph.ocean.exception.CheckThrower;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
-import com.google.common.collect.Maps;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 

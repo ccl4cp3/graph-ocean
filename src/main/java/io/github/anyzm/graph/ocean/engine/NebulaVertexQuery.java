@@ -10,8 +10,8 @@ import io.github.anyzm.graph.ocean.domain.GraphCondition;
 import io.github.anyzm.graph.ocean.domain.GraphExpression;
 import io.github.anyzm.graph.ocean.domain.GraphQuery;
 import io.github.anyzm.graph.ocean.domain.VertexQuery;
+import io.github.anyzm.graph.ocean.domain.impl.GraphVertexEntity;
 import io.github.anyzm.graph.ocean.domain.impl.GraphVertexType;
-import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Map;
@@ -25,7 +25,6 @@ import java.util.Map;
  */
 public class NebulaVertexQuery implements VertexQuery {
 
-    @Getter
     @Setter
     private static GraphTypeManager graphTypeManager;
 
@@ -44,6 +43,15 @@ public class NebulaVertexQuery implements VertexQuery {
         String vertexName = graphVertexType.getVertexName();
         sqlBuilder.append("fetch prop on ").append(vertexName);
         NebulaQueryUtils.appendVertexId(graphVertexType, sqlBuilder, vertexIds);
+        sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
+        return this;
+    }
+
+    @Override
+    public <T> VertexQuery fetchPropOn(GraphVertexEntity<T> graphVertexEntity) {
+        String vertexName = graphVertexEntity.getVertexName();
+        sqlBuilder.append("fetch prop on ").append(vertexName);
+        NebulaQueryUtils.appendVertexId(graphVertexEntity.getGraphVertexType(), sqlBuilder, graphVertexEntity.getId());
         sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
         return this;
     }
@@ -84,14 +92,20 @@ public class NebulaVertexQuery implements VertexQuery {
     }
 
     @Override
+    public VertexQuery yieldAllProperties() {
+        sqlBuilder.append(" yield properties(vertex) ");
+        return this;
+    }
+
+    @Override
     public VertexQuery yield(String symbol, Class clazz, String... fields) {
         NebulaQueryUtils.yield(graphTypeManager, sqlBuilder, symbol, clazz, fields);
         return this;
     }
 
     @Override
-    public VertexQuery yield(Class clazz, String... fields) {
-        NebulaQueryUtils.yield(graphTypeManager, sqlBuilder, clazz, fields);
+    public VertexQuery yield(Class clazz, String... properties) {
+        NebulaQueryUtils.yield(graphTypeManager, sqlBuilder, clazz, properties);
         return this;
     }
 

@@ -25,6 +25,10 @@ public enum GraphPropertyTypeEnum {
      */
     GRAPH_VERTEX_ID,
     /**
+     * 顶点类型，使用字段值作为顶点名称
+     */
+    GRAPH_VERTEX_TYPE,
+    /**
      * 普通属性
      */
     ORDINARY_PROPERTY;

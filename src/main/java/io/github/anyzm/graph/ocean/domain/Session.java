@@ -19,22 +19,31 @@ import io.github.anyzm.graph.ocean.exception.NebulaExecuteException;
 public interface Session {
 
     /**
-     * 执行更新操作
+     * 执行数据插入、更新、删除操作
      *
-     * @param statement
+     * @param dmlSql
      * @return
      * @throws NebulaExecuteException
      */
-    public int execute(String statement) throws NebulaExecuteException;
+    public int executeDml(String dmlSql) throws NebulaExecuteException;
 
     /**
      * 执行查询
      *
-     * @param statement
+     * @param querySql
      * @return
      * @throws NebulaExecuteException
      */
-    public QueryResult executeQueryDefined(String statement) throws NebulaExecuteException;
+    public QueryResult executeQuery(String querySql) throws NebulaExecuteException;
+
+    /**
+     * 执行schema操作
+     *
+     * @param ddlSql
+     * @return
+     * @throws NebulaExecuteException
+     */
+    public boolean executeDdl(String ddlSql);
 
     /**
      * 释放session

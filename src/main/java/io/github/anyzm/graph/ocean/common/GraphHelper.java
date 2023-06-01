@@ -9,6 +9,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.github.anyzm.graph.ocean.annotation.GraphProperty;
 import io.github.anyzm.graph.ocean.dao.GraphValueFormatter;
+import io.github.anyzm.graph.ocean.dao.impl.DateGraphValueFormatter;
+import io.github.anyzm.graph.ocean.dao.impl.DateTimeGraphValueFormatter;
+import io.github.anyzm.graph.ocean.dao.impl.TimeStampGraphValueFormatter;
 import io.github.anyzm.graph.ocean.domain.GraphLabel;
 import io.github.anyzm.graph.ocean.domain.GraphLabelBuilder;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeType;
@@ -126,73 +129,93 @@ public class GraphHelper {
 
     private static void collectGraphField(GraphLabelBuilder graphLabelBuilder, Field declaredField, List<String> mustProps,
                                           Map<String, String> propertyFieldMap, Map<String, GraphValueFormatter> propertyFormatMap,
-                                          Map<String, GraphDataTypeEnum> dataTypeMap, boolean srcIdAsField, boolean dstIdAsField) {
+                                          Map<String, GraphDataTypeEnum> dataTypeMap, Map<String, String> propertyDefaultValueMap,
+                                          Map<String, String> propertyCommentMap, boolean srcIdAsField, boolean dstIdAsField) {
         declaredField.setAccessible(true);
         GraphProperty graphProperty = declaredField.getAnnotation(GraphProperty.class);
         if (graphProperty == null) {
             return;
         }
         String value = graphProperty.value();
-        dataTypeMap.put(value, graphProperty.dataType());
-        Class<? extends GraphValueFormatter> formatter = graphProperty.formatter();
+        // 优先使用指定的类型，如果未指定根据java类型推断
+        GraphDataTypeEnum dataType = graphProperty.dataType();
+        if(GraphDataTypeEnum.NULL == dataType) {
+            dataType = GraphDataTypeEnum.findByJavaType(declaredField.getType().getSimpleName());
+        }
+        dataTypeMap.put(value, dataType);
+
+        GraphValueFormatter formatter = null;
+        if(GraphValueFormatter.class == graphProperty.formatter()) {
+            switch (dataType) {
+                case TIMESTAMP:
+                    formatter = TimeStampGraphValueFormatter.INSTANCE;
+                    break;
+                case DATE:
+                    formatter = DateGraphValueFormatter.INSTANCE;
+                    break;
+                case DATETIME:
+                    formatter = DateTimeGraphValueFormatter.INSTANCE;
+                    break;
+                default:
+                    break;
+            }
+        }else {
+            try {
+                formatter = graphProperty.formatter().newInstance();
+            }catch (Exception e) {
+                throw new NebulaException(ErrorEnum.FIELD_FORMAT_NO_CONSTRUCTOR);
+            }
+        }
+
         GraphPropertyTypeEnum graphPropertyTypeEnum = graphProperty.propertyTypeEnum();
         switch (graphPropertyTypeEnum) {
+            case GRAPH_VERTEX_TYPE:
+                graphLabelBuilder.graphLabelField(value);
+                break;
             case GRAPH_VERTEX_ID:
                 if (srcIdAsField && dstIdAsField) {
-                    propertyFieldMap.put(declaredField.getName(), value);
+                    propertyFieldMap.put(value, declaredField.getName());
                     mustProps.add(value);
                 }
-                if (GraphValueFormatter.class != formatter) {
-                    try {
-                        graphLabelBuilder.idValueFormatter(formatter.newInstance());
-                    } catch (Exception e) {
-                        throw new NebulaException(ErrorEnum.FIELD_FORMAT_NO_CONSTRUCTOR);
-                    }
+                if (null != formatter) {
+                    graphLabelBuilder.idValueFormatter(formatter);
                 }
                 break;
             case GRAPH_EDGE_SRC_ID:
                 if (srcIdAsField) {
-                    propertyFieldMap.put(declaredField.getName(), value);
+                    propertyFieldMap.put(value, declaredField.getName());
                     mustProps.add(value);
                 }
-                if (GraphValueFormatter.class != formatter) {
-                    try {
-                        graphLabelBuilder.srcIdValueFormatter(formatter.newInstance());
-                    } catch (Exception e) {
-                        throw new NebulaException(ErrorEnum.FIELD_FORMAT_NO_CONSTRUCTOR);
-                    }
+                if (null != formatter) {
+                    graphLabelBuilder.srcIdValueFormatter(formatter);
                 }
                 break;
             case GRAPH_EDGE_DST_ID:
                 if (dstIdAsField) {
-                    propertyFieldMap.put(declaredField.getName(), value);
+                    propertyFieldMap.put(value, declaredField.getName());
                     mustProps.add(value);
                 }
-                if (GraphValueFormatter.class != formatter) {
-                    try {
-                        graphLabelBuilder.dstIdValueFormatter(formatter.newInstance());
-                    } catch (Exception e) {
-                        throw new NebulaException(ErrorEnum.FIELD_FORMAT_NO_CONSTRUCTOR);
-                    }
+                if (null != formatter) {
+                    graphLabelBuilder.dstIdValueFormatter(formatter);
                 }
                 break;
             case ORDINARY_PROPERTY:
-                propertyFieldMap.put(declaredField.getName(), value);
+                propertyFieldMap.put(value, declaredField.getName());
                 if (graphProperty.required()) {
                     mustProps.add(value);
                 }
-                if (GraphValueFormatter.class != formatter) {
-                    try {
-                        propertyFormatMap.put(value, formatter.newInstance());
-                    } catch (Exception e) {
-                        throw new NebulaException(ErrorEnum.FIELD_FORMAT_NO_CONSTRUCTOR);
-                    }
+                if (null != formatter) {
+                    propertyFormatMap.put(value, formatter);
                 }
                 break;
             default:
                 break;
         }
 
+        // 默认值
+        propertyDefaultValueMap.put(value, graphProperty.defaultValue());
+        // 注释
+        propertyCommentMap.put(value, graphProperty.comment());
     }
 
     public static void collectGraphProperties(GraphLabelBuilder graphLabelBuilder, Class clazz,
@@ -202,20 +225,25 @@ public class GraphHelper {
         List<String> mustProps = Lists.newArrayListWithExpectedSize(size);
         //所有属性（包括必要属性）
         Map<String, String> propertyFieldMap = Maps.newHashMapWithExpectedSize(size);
-        //字段类型
+        //属性类型
         Map<String, GraphDataTypeEnum> dataTypeMap = Maps.newHashMapWithExpectedSize(size);
-        //字段转换工厂
+        //属性转换工厂
         Map<String, GraphValueFormatter> propertyFormatMap = Maps.newHashMapWithExpectedSize(size);
+        //属性默认值
+        Map<String, String> propertyDefaultValueMap = Maps.newHashMapWithExpectedSize(size);
+        // 属性注释
+        Map<String, String> propertyCommentMap = Maps.newHashMapWithExpectedSize(size);
+
         for (Field declaredField : declaredFields) {
             collectGraphField(graphLabelBuilder, declaredField, mustProps, propertyFieldMap, propertyFormatMap,
-                    dataTypeMap, srcIdAsField, dstIdAsField);
+                    dataTypeMap, propertyDefaultValueMap, propertyCommentMap, srcIdAsField, dstIdAsField);
         }
         Class superclass = clazz.getSuperclass();
         while (superclass != Object.class) {
             declaredFields = superclass.getDeclaredFields();
             for (Field declaredField : declaredFields) {
                 collectGraphField(graphLabelBuilder, declaredField, mustProps, propertyFieldMap, propertyFormatMap,
-                        dataTypeMap, srcIdAsField, dstIdAsField);
+                        dataTypeMap, propertyDefaultValueMap, propertyCommentMap, srcIdAsField, dstIdAsField);
             }
             superclass = superclass.getSuperclass();
         }
@@ -224,6 +252,8 @@ public class GraphHelper {
         graphLabelBuilder.mustProps(mustProps);
         graphLabelBuilder.propertyFieldMap(propertyFieldMap);
         graphLabelBuilder.propertyFormatMap(propertyFormatMap);
+        graphLabelBuilder.propertyDefaultValueMap(propertyDefaultValueMap);
+        graphLabelBuilder.propertyCommentMap(propertyCommentMap);
     }
 
     public static Object formatFieldValue(Field declaredField, GraphProperty graphProperty, Object input, GraphLabel graphLabel) {

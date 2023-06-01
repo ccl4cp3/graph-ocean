@@ -5,6 +5,8 @@
  */
 package io.github.anyzm.graph.ocean.domain;
 
+import io.github.anyzm.graph.ocean.domain.impl.GraphVertexEntity;
+
 import java.util.Map;
 
 /**
@@ -24,6 +26,14 @@ public interface VertexQuery extends GraphQuery {
      * @return 顶点查询API
      */
     public VertexQuery fetchPropOn(Class clazz, String... vertexIds);
+
+    /**
+     * 查询顶点属性
+     *
+     * @param graphVertexEntity 实体
+     * @return 顶点查询API
+     */
+    public <T> VertexQuery fetchPropOn(GraphVertexEntity<T> graphVertexEntity);
 
 
     /**
@@ -57,12 +67,12 @@ public interface VertexQuery extends GraphQuery {
     /**
      * 查询哪个标签的哪些属性
      *
-     * @param clazz 类类行
-     * @param fields 字段
+     * @param clazz 标签类
+     * @param properties 属性列表
      * @return 查询API
      */
     @Override
-    public VertexQuery yield(Class clazz, String... fields);
+    public VertexQuery yield(Class clazz, String... properties);
 
     /**
      * 去重
@@ -80,6 +90,12 @@ public interface VertexQuery extends GraphQuery {
     @Override
     public VertexQuery yield();
 
+    /**
+     * 查询顶点的所有属性
+     * @return
+     */
+    @Override
+    public VertexQuery yieldAllProperties();
 
     /**
      * 查询哪个标签的哪些属性

@@ -40,6 +40,18 @@ public class GraphEdgeTypeBuilder implements GraphLabelBuilder {
     }
 
     @Override
+    public GraphEdgeTypeBuilder graphLabelComment(String graphLabelComment) {
+        this.graphEdgeType.setComment(graphLabelComment);
+        return this;
+    }
+
+    @Override
+    public GraphEdgeTypeBuilder graphLabelField(String graphLabelField) {
+        // 边类型暂时不支持动态设置
+        return this;
+    }
+
+    @Override
     public GraphEdgeTypeBuilder labelClass(Class labelClass) {
         this.graphEdgeType.setEdgeClass(labelClass);
         return this;
@@ -59,13 +71,25 @@ public class GraphEdgeTypeBuilder implements GraphLabelBuilder {
 
     @Override
     public GraphEdgeTypeBuilder mustProps(List<String> mustProps) {
-        this.graphEdgeType.setMustFields(mustProps);
+        this.graphEdgeType.setMustProperties(mustProps);
         return this;
     }
 
     @Override
     public GraphEdgeTypeBuilder propertyFieldMap(Map<String, String> propertyFieldMap) {
         this.graphEdgeType.setPropertyFieldMap(propertyFieldMap);
+        return this;
+    }
+
+    @Override
+    public GraphLabelBuilder propertyDefaultValueMap(Map<String, String> propertyDefaultValueMap) {
+        this.graphEdgeType.setPropertyDefaultValueMap(propertyDefaultValueMap);
+        return this;
+    }
+
+    @Override
+    public GraphLabelBuilder propertyCommentMap(Map<String, String> propertyCommentMap) {
+        this.graphEdgeType.setPropertyCommentMap(propertyCommentMap);
         return this;
     }
 

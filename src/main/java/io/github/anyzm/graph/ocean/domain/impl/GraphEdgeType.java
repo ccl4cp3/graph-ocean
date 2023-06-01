@@ -54,7 +54,7 @@ public class GraphEdgeType<S, T, E> extends AbstractGraphLabel {
                           GraphVertexType<S> srcVertexType, GraphVertexType<T> dstVertexType, boolean srcIdAsField, boolean dstIdAsField) {
         this.edgeName = edgeName;
         this.edgeClass = edgeClass;
-        this.mustFields = mustFields;
+        this.mustProperties = mustFields;
         this.propertyFieldMap = propertyFieldMap;
         this.propertyFormatMap = propertyFormatMap;
         this.srcVertexType = srcVertexType;

@@ -6,6 +6,7 @@
 package io.github.anyzm.graph.ocean.mapper;
 
 import com.google.common.collect.Lists;
+import com.vesoft.nebula.ErrorCode;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
@@ -15,16 +16,14 @@ import io.github.anyzm.graph.ocean.dao.*;
 import io.github.anyzm.graph.ocean.dao.impl.DefaultGraphEdgeEntityFactory;
 import io.github.anyzm.graph.ocean.dao.impl.DefaultGraphTypeManager;
 import io.github.anyzm.graph.ocean.dao.impl.DefaultGraphVertexEntityFactory;
-import io.github.anyzm.graph.ocean.domain.EdgeQuery;
-import io.github.anyzm.graph.ocean.domain.GraphLabel;
-import io.github.anyzm.graph.ocean.domain.GraphQuery;
-import io.github.anyzm.graph.ocean.domain.VertexQuery;
+import io.github.anyzm.graph.ocean.domain.*;
 import io.github.anyzm.graph.ocean.domain.impl.*;
 import io.github.anyzm.graph.ocean.engine.*;
 import io.github.anyzm.graph.ocean.enums.EdgeDirectionEnum;
 import io.github.anyzm.graph.ocean.enums.ErrorEnum;
 import io.github.anyzm.graph.ocean.exception.CheckThrower;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
+import io.github.anyzm.graph.ocean.exception.NebulaExecuteException;
 import io.github.anyzm.graph.ocean.session.NebulaPoolSessionManager;
 import io.github.anyzm.graph.ocean.session.NebulaSessionWrapper;
 import lombok.Getter;
@@ -74,6 +73,7 @@ public class NebulaGraphMapper implements GraphMapper {
         NebulaCondition.setGraphTypeManager(graphTypeManager);
         NebulaVertexQuery.setGraphTypeManager(graphTypeManager);
         NebulaEdgeQuery.setGraphTypeManager(graphTypeManager);
+        NebulaSchemaManager.setGraphTypeManager(graphTypeManager);
     }
 
     public NebulaGraphMapper(NebulaPoolSessionManager nebulaPoolSessionManager,
@@ -139,8 +139,8 @@ public class NebulaGraphMapper implements GraphMapper {
             log.debug("构造对象entity={},graphEdgeEntity={}", entity, graphEdgeEntity);
             S srcEntity = srcVertexEntityFunction.apply(graphEdgeEntity.getSrcId());
             T dstEntity = dstVertexEntityFunction.apply(graphEdgeEntity.getDstId());
-            GraphVertexEntity<S> srcVertexEntity = (GraphVertexEntity<S>) graphVertexEntityFactory.buildGraphVertexEntity(srcEntity);
-            GraphVertexEntity<T> dstVertexEntity = (GraphVertexEntity<T>) graphVertexEntityFactory.buildGraphVertexEntity(dstEntity);
+            GraphVertexEntity<S> srcVertexEntity = graphVertexEntityFactory.buildGraphVertexEntity(srcEntity);
+            GraphVertexEntity<T> dstVertexEntity = graphVertexEntityFactory.buildGraphVertexEntity(dstEntity);
             srcGraphVertexEntities.add(srcVertexEntity);
             dstGraphVertexEntities.add(dstVertexEntity);
             graphEdgeEntities.add(graphEdgeEntity);
@@ -179,7 +179,7 @@ public class NebulaGraphMapper implements GraphMapper {
             NebulaSessionWrapper session = null;
             try {
                 session = nebulaPoolSessionManager.getSession();
-                int execute = session.execute(String.format(SQL, space, sql));
+                int execute = session.executeDml(String.format(SQL, space, sql));
                 CheckThrower.ifTrueThrow(execute != 0, ErrorEnum.UPDATE_NEBULA_EROR);
             } finally {
                 if (session != null) {
@@ -195,7 +195,7 @@ public class NebulaGraphMapper implements GraphMapper {
         NebulaSessionWrapper session = null;
         try {
             session = nebulaPoolSessionManager.getSession();
-            return session.execute(String.format(SQL, space, sql));
+            return session.executeDml(String.format(SQL, space, sql));
         } finally {
             if (session != null) {
                 session.release();
@@ -218,7 +218,7 @@ public class NebulaGraphMapper implements GraphMapper {
         NebulaSessionWrapper session = null;
         try {
             session = nebulaPoolSessionManager.getSession();
-            return session.executeQueryDefined(String.format(SQL, space, sql));
+            return session.executeQuery(String.format(SQL, space, sql));
         } finally {
             if (session != null) {
                 session.release();
@@ -254,7 +254,7 @@ public class NebulaGraphMapper implements GraphMapper {
     public <T> List<T> goOutEdge(Class<T> edgeClazz, String... vertexIds) throws
             UnsupportedEncodingException, IllegalAccessException, InstantiationException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException {
         GraphEdgeType<Object, Object, T> graphEdgeType = graphTypeManager.getGraphEdgeType(edgeClazz);
-        String[] fieldsName = CollectionUtils.toStringArray(graphEdgeType.getAllFields());
+        String[] fieldsName = CollectionUtils.toStringArray(graphEdgeType.getAllProperties());
         EdgeQuery query = NebulaEdgeQuery.build().goFrom(edgeClazz, vertexIds).yield(edgeClazz, fieldsName);
         return executeQuery(query, edgeClazz);
     }
@@ -263,7 +263,7 @@ public class NebulaGraphMapper implements GraphMapper {
     public <T> List<T> goReverseEdge(Class<T> edgeClazz, String... vertexIds) throws
             UnsupportedEncodingException, IllegalAccessException, InstantiationException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException {
         GraphEdgeType<Object, Object, T> graphEdgeType = graphTypeManager.getGraphEdgeType(edgeClazz);
-        String[] fieldsName = CollectionUtils.toStringArray(graphEdgeType.getAllFields());
+        String[] fieldsName = CollectionUtils.toStringArray(graphEdgeType.getAllProperties());
         EdgeQuery query = NebulaEdgeQuery.build().goFrom(edgeClazz, EdgeDirectionEnum.REVERSELY, vertexIds).yield(edgeClazz, fieldsName);
         return executeQuery(query, edgeClazz);
     }
@@ -272,9 +272,97 @@ public class NebulaGraphMapper implements GraphMapper {
     public <T> List<T> fetchVertexTag(Class<T> vertexClazz, String... vertexIds) throws
             UnsupportedEncodingException, IllegalAccessException, InstantiationException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException {
         GraphVertexType<T> graphVertexType = graphTypeManager.getGraphVertexType(vertexClazz);
-        String[] fieldsName = CollectionUtils.toStringArray(graphVertexType.getAllFields());
-        VertexQuery query = NebulaVertexQuery.build().fetchPropOn(vertexClazz, vertexIds).yield(vertexClazz, fieldsName);
+        String[] properties = CollectionUtils.toStringArray(graphVertexType.getAllProperties());
+        VertexQuery query = NebulaVertexQuery.build().fetchPropOn(vertexClazz, vertexIds).yield(vertexClazz, properties);
         return executeQuery(query, vertexClazz);
     }
 
+    @Override
+    public <T> T fetchVertexTag(T entity) throws UnsupportedEncodingException, IllegalAccessException, InstantiationException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException {
+        Class<T> vertexClazz = (Class<T>) entity.getClass();
+        GraphVertexEntity<T> graphVertexEntity = graphVertexEntityFactory.buildGraphVertexEntity(entity);
+        String[] properties = CollectionUtils.toStringArray(graphVertexEntity.getGraphVertexType().getAllProperties());
+        VertexQuery query = NebulaVertexQuery.build().fetchPropOn(graphVertexEntity).yield(vertexClazz, properties);
+        List<T> list = executeQuery(query, vertexClazz);
+        if(CollectionUtils.isEmpty(list)) {
+            return null;
+        }
+        return list.get(0);
+    }
+
+    @Override
+    public <T> boolean createTag(String space, Class<T> vertexClazz, String tagName, String tagComment) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildCreateTagSql(vertexClazz, tagName, tagComment);
+        String schemaSql = String.format(SQL, space, sql);
+        return executeSchemaSql(schemaSql);
+    }
+
+    @Override
+    public <E> boolean createEdge(String space, Class<E> edgeClazz) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildCreateEdgeSql(edgeClazz);
+        String schemaSql = String.format(SQL, space, sql);
+        return executeSchemaSql(schemaSql);
+    }
+
+    @Override
+    public <T> boolean createTagIndex(String space, Class<T> vertexClazz, String tagName) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildCreateTagIndexSql(vertexClazz, tagName);
+        String schemaSql = String.format(SQL, space, sql);
+        return executeSchemaSql(schemaSql);
+    }
+
+    @Override
+    public <E> boolean createEdgeIndex(String space, Class<E> edgeClazz) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildCreateEdgeIndexSql(edgeClazz);
+        String schemaSql = String.format(SQL, space, sql);
+        return executeSchemaSql(schemaSql);
+    }
+
+    @Override
+    public boolean createSpace(GraphSpace graphSpace) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildCreateSpaceSql(graphSpace);
+        return executeSchemaSql(sql);
+    }
+
+    @Override
+    public boolean cloneSpace(String existSpaceName, String newSpaceName) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildCloneSpaceSql(existSpaceName, newSpaceName);
+        return executeSchemaSql(sql);
+    }
+
+    @Override
+    public boolean clearSpace(String spaceName) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildClearSpaceSql(spaceName);
+        return executeSchemaSql(sql);
+    }
+
+    @Override
+    public boolean dropSpace(String spaceName) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildDropSpaceSql(spaceName);
+        return executeSchemaSql(sql);
+    }
+
+    private boolean executeSchemaSql(String sql) throws NebulaExecuteException {
+        NebulaSessionWrapper session = null;
+        try {
+            session = nebulaPoolSessionManager.getSession();
+            boolean success = session.executeDdl(String.format(SQL, space, sql));
+            // 创建异步实现，需要等待2个心跳周期(20s)
+            if(success) {
+                Thread.sleep(20000);
+            }
+            return success;
+        } catch (InterruptedException e) {
+            // ignore;
+            return true;
+        } catch (IOErrorException|ClientServerIncompatibleException|NotValidConnectionException e) {
+            throw new NebulaExecuteException(ErrorCode.E_RPC_FAILURE.getValue(), e.getMessage(), e);
+        } catch (AuthFailedException e) {
+            throw new NebulaExecuteException(ErrorCode.E_PRIVILEGE_ACTION_INVALID.getValue(), e.getMessage(), e);
+        } finally {
+            if (session != null) {
+                session.release();
+            }
+        }
+    }
 }

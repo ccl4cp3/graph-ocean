@@ -60,6 +60,11 @@ public interface GraphQuery {
      */
     public GraphQuery yield();
 
+    /**
+     * 查询哪个标签的所有属性
+     * @return
+     */
+    public GraphQuery yieldAllProperties();
 
     /**
      * 查询哪个标签的哪些属性

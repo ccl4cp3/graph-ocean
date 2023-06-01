@@ -72,16 +72,24 @@ public class NebulaBatchVertexUpdate<T> implements VertexUpdateEngine {
         Map<String, GraphDataTypeEnum> dataTypeMap = graphVertexEntity.getGraphVertexType().getDataTypeMap();
         for (Map.Entry<String, Object> entry : entries) {
             GraphDataTypeEnum graphDataTypeEnum = dataTypeMap.get(entry.getKey());
-            if (GraphDataTypeEnum.STRING.equals(graphDataTypeEnum)) {
-                builder.append(',').append(this.graphVertexType.getVertexName()).append('.')
-                        .append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
-            } else {
-                builder.append(',').append(this.graphVertexType.getVertexName()).append('.')
-                        .append(entry.getKey()).append("=").append(entry.getValue());
+            if(null == graphDataTypeEnum || GraphDataTypeEnum.NULL.equals(graphDataTypeEnum)) {
+                continue;
+            }
+
+            switch (graphDataTypeEnum) {
+                case STRING:
+                case FIXED_STRING:
+                    builder.append(',').append(graphVertexEntity.getVertexName()).append('.')
+                            .append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
+                    break;
+                default:
+                    builder.append(',').append(graphVertexEntity.getVertexName()).append('.')
+                            .append(entry.getKey()).append("=").append(entry.getValue());
+                    break;
             }
         }
         String sqlSet = builder.delete(0, 1).toString();
-        return String.format(VERTEX_UPSET_SQL, this.graphVertexType.getVertexName(), queryId, sqlSet);
+        return String.format(VERTEX_UPSET_SQL, graphVertexEntity.getVertexName(), queryId, sqlSet);
     }
 
     @Override

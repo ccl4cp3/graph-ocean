@@ -106,58 +106,84 @@ public class QueryResult implements Iterable<ResultSet.Record>, Serializable {
         T obj = clazz.newInstance();
         List<Field> fieldsList = FieldUtils.listFields(clazz);
         for (Field field : fieldsList) {
+            ValueWrapper valueWrapper = getValueWrapper(record, field);
+            if(null == valueWrapper || valueWrapper.isNull()) {
+                continue;
+            }
+
+            field.setAccessible(true);
             GraphProperty annotation = field.getAnnotation(GraphProperty.class);
-            String key = annotation != null ? annotation.value() : field.getName();
-            if (record.contains(key)) {
-                ValueWrapper valueWrapper = record.get(key);
-                if (!valueWrapper.isNull()) {
-                    field.setAccessible(true);
-                    if (annotation != null && !GraphDataTypeEnum.NULL.equals(annotation.dataType())) {
-                        switch (annotation.dataType()) {
-                            case INT:
-                                dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asLong());
-                                break;
-                            case STRING:
-                                dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asString());
-                                break;
-                            case DATE:
-                                dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asDate());
-                                break;
-                            case DATE_TIME:
-                                dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asDateTime());
-                                break;
-                            case BOOLEAN:
-                                dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asBoolean());
-                                break;
-                            case TIMESTAMP:
-                                dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asTime());
-                                break;
-                            case DOUBLE:
-                                dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asDouble());
-                                break;
-                            default:
-                        }
-                        continue;
-                    }
-                    if (valueWrapper.isLong()) {
-                        dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asLong());
-                    } else if (valueWrapper.isBoolean()) {
-                        dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asBoolean());
-                    } else if (valueWrapper.isDouble()) {
-                        dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asDouble());
-                    } else if (valueWrapper.isDate()) {
-                        dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asDouble());
-                    } else if (valueWrapper.isDateTime()) {
-                        dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asDateTime());
-                    } else if (valueWrapper.isTime()) {
-                        dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asTime());
-                    } else if (valueWrapper.isString()) {
-                        dealFieldReformat(graphLabel, key, field, obj, valueWrapper.asString());
-                    }
+            // 属性字段
+            if(null != annotation) {
+                String property = annotation.value();
+                GraphDataTypeEnum dataType = graphLabel.getDataType(property);
+                switch (dataType) {
+                    case INT64:
+                    case TIMESTAMP:
+                        dealFieldReformat(graphLabel, property, field, obj, valueWrapper.asLong());
+                        break;
+                    case INT16:
+                        dealFieldReformat(graphLabel, property, field, obj, (int) valueWrapper.asLong());
+                        break;
+                    case STRING:
+                    case FIXED_STRING:
+                        dealFieldReformat(graphLabel, property, field, obj, valueWrapper.asString());
+                        break;
+                    case DATE:
+                        dealFieldReformat(graphLabel, property, field, obj, valueWrapper.asDate());
+                        break;
+                    case DATETIME:
+                        dealFieldReformat(graphLabel, property, field, obj, valueWrapper.asDateTime());
+                        break;
+                    case BOOLEAN:
+                        dealFieldReformat(graphLabel, property, field, obj, valueWrapper.asBoolean());
+                        break;
+                    case DOUBLE:
+                        dealFieldReformat(graphLabel, property, field, obj, valueWrapper.asDouble());
+                        break;
+                    default:
+                        break;
                 }
+                continue;
+            }
+
+            // 非属性字段
+            if (valueWrapper.isLong()) {
+                field.set(obj, valueWrapper.asLong());
+            } else if (valueWrapper.isBoolean()) {
+                field.set(obj, valueWrapper.asBoolean());
+            } else if (valueWrapper.isDouble()) {
+                field.set(obj, valueWrapper.asDouble());
+            } else if (valueWrapper.isDate()) {
+                field.set(obj, valueWrapper.asDate());
+            } else if (valueWrapper.isDateTime()) {
+                field.set(obj, valueWrapper.asDateTime());
+            } else if (valueWrapper.isTime()) {
+                field.set(obj, valueWrapper.asTime());
+            } else if (valueWrapper.isString()) {
+                field.set(obj, valueWrapper.asString());
             }
         }
         return obj;
+    }
+
+    private ValueWrapper getValueWrapper(ResultSet.Record record, Field field) {
+        // 先使用字段名获取
+        String fieldName = field.getName();
+        if(record.contains(fieldName)) {
+            return record.get(fieldName);
+        }
+
+        // 再使用属性名获取
+        GraphProperty annotation = field.getAnnotation(GraphProperty.class);
+        if(null != annotation) {
+            String property = annotation.value();
+            if(record.contains(property)) {
+                return record.get(property);
+            }
+        }
+
+        return null;
     }
 
 }

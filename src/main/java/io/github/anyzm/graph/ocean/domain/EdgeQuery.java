@@ -130,6 +130,14 @@ public interface EdgeQuery extends GraphQuery {
 
 
     /**
+     * 查询边的所有属性
+     * @return
+     */
+    @Override
+    public EdgeQuery yieldAllProperties();
+
+
+    /**
      * 查询哪个标签的哪些属性
      *
      * @param clazz 类类型

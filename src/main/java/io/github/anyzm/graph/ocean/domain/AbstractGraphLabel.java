@@ -30,7 +30,7 @@ public abstract class AbstractGraphLabel implements GraphLabel {
     /**
      * 必要字段
      */
-    protected List<String> mustFields;
+    protected List<String> mustProperties;
 
     /**
      * 所有属性和字段映射
@@ -40,13 +40,28 @@ public abstract class AbstractGraphLabel implements GraphLabel {
     protected Map<String, GraphValueFormatter> propertyFormatMap;
 
     /**
-     * 字段的数据类型
+     * 属性的数据类型
      */
     protected Map<String, GraphDataTypeEnum> dataTypeMap;
 
+    /**
+     * 属性的默认值
+     */
+    protected Map<String, String> propertyDefaultValueMap;
+
+    /**
+     * 属性的注释
+     */
+    protected Map<String, String> propertyCommentMap;
+
+    /**
+     * 标签的注释
+     */
+    protected String comment;
+
     @Override
-    public Object formatValue(String field, Object originalValue) {
-        GraphValueFormatter graphValueFormatter = this.propertyFormatMap.get(field);
+    public Object formatValue(String property, Object originalValue) {
+        GraphValueFormatter graphValueFormatter = this.propertyFormatMap.get(property);
         if (graphValueFormatter != null) {
             return graphValueFormatter.format(originalValue);
         }
@@ -54,8 +69,8 @@ public abstract class AbstractGraphLabel implements GraphLabel {
     }
 
     @Override
-    public Object reformatValue(String field, Object databaseValue) {
-        GraphValueFormatter graphValueFormatter = this.propertyFormatMap.get(field);
+    public Object reformatValue(String property, Object databaseValue) {
+        GraphValueFormatter graphValueFormatter = this.propertyFormatMap.get(property);
         if (graphValueFormatter != null) {
             return graphValueFormatter.reformat(databaseValue);
         }
@@ -65,6 +80,7 @@ public abstract class AbstractGraphLabel implements GraphLabel {
     @Override
     public String getFieldName(String property) {
         String fieldName = this.propertyFieldMap.get(property);
+        // 未找到使用属性名
         if (StringUtils.isBlank(fieldName)) {
             fieldName = property;
         }
@@ -78,21 +94,38 @@ public abstract class AbstractGraphLabel implements GraphLabel {
                 return next.getKey();
             }
         }
+        // 未找到返回字段名
         return field;
     }
 
     @Override
-    public GraphDataTypeEnum getFieldDataType(String field) {
-        GraphDataTypeEnum graphDataTypeEnum = this.dataTypeMap.get(field);
+    public GraphDataTypeEnum getDataType(String property) {
+        GraphDataTypeEnum graphDataTypeEnum = this.dataTypeMap.get(property);
         if (graphDataTypeEnum == null) {
-            graphDataTypeEnum = GraphDataTypeEnum.STRING;
+            graphDataTypeEnum = GraphDataTypeEnum.NULL;
         }
         return graphDataTypeEnum;
     }
 
     @Override
-    public Collection<String> getAllFields() {
-        return propertyFieldMap.values();
+    public Collection<String> getAllProperties() {
+        return propertyFieldMap.keySet();
     }
+
+    @Override
+    public boolean isMust(String property) {
+        return mustProperties.contains(property);
+    }
+
+    @Override
+    public String getPropertyDefaultValue(String property) {
+        return propertyDefaultValueMap.get(property);
+    }
+
+    @Override
+    public String getPropertyComment(String property) {
+        return propertyCommentMap.get(property);
+    }
+
 
 }

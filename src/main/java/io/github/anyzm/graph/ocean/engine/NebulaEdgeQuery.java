@@ -167,6 +167,12 @@ public class NebulaEdgeQuery implements EdgeQuery {
     }
 
     @Override
+    public EdgeQuery yieldAllProperties() {
+        sqlBuilder.append(" yield properties(edge) ");
+        return this;
+    }
+
+    @Override
     public EdgeQuery yield(Class clazz, String... fields) {
         NebulaQueryUtils.yield(graphTypeManager, sqlBuilder, clazz, fields);
         return this;

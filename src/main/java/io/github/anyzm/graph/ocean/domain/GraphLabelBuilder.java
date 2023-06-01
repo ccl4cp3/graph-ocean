@@ -31,6 +31,22 @@ public interface GraphLabelBuilder {
     public GraphLabelBuilder graphLabelName(String graphLabelName);
 
     /**
+     * 构造元素名
+     *
+     * @param graphLabelComment 标签注释
+     * @return 标签构造器
+     */
+    public GraphLabelBuilder graphLabelComment(String graphLabelComment);
+
+    /**
+     * 用于动态构造元素名
+     *
+     * @param graphLabelField 标签字段
+     * @return 标签构造器
+     */
+    public GraphLabelBuilder graphLabelField(String graphLabelField);
+
+    /**
      * 构造元素对应的类
      *
      * @param labelClass 标签类类型
@@ -69,6 +85,20 @@ public interface GraphLabelBuilder {
      * @return 标签构造器
      */
     public GraphLabelBuilder propertyFieldMap(Map<String, String> propertyFieldMap);
+
+    /**
+     * 构造属性默认值map
+     * @param propertyDefaultValueMap
+     * @return 标签构造器
+     */
+    public GraphLabelBuilder propertyDefaultValueMap(Map<String, String> propertyDefaultValueMap);
+
+    /**
+     * 构造属性注释map
+     * @param propertyCommentMap
+     * @return 标签构造器
+     */
+    public GraphLabelBuilder propertyCommentMap(Map<String, String> propertyCommentMap);
 
     /**
      * 构造主键策略

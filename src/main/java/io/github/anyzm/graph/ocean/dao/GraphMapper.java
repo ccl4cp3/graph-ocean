@@ -9,10 +9,12 @@ package io.github.anyzm.graph.ocean.dao;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import com.vesoft.nebula.client.graph.exception.NotValidConnectionException;
 import io.github.anyzm.graph.ocean.domain.GraphQuery;
+import io.github.anyzm.graph.ocean.domain.GraphSpace;
 import io.github.anyzm.graph.ocean.domain.impl.QueryResult;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
-import com.vesoft.nebula.client.graph.exception.NotValidConnectionException;
+import io.github.anyzm.graph.ocean.exception.NebulaExecuteException;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -192,4 +194,84 @@ public interface GraphMapper {
      */
     public <T> List<T> fetchVertexTag(Class<T> vertexClazz, String... vertexIds) throws UnsupportedEncodingException, IllegalAccessException, InstantiationException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException;
 
+    /**
+     * 查询tag属性
+     *
+     * @param entity 顶点实体
+     * @return 顶点列表
+     */
+    public <T> T fetchVertexTag(T entity) throws UnsupportedEncodingException, IllegalAccessException, InstantiationException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException;
+
+
+    /**
+     * 创建tag
+     * @param space
+     * @param vertexClazz
+     * @param tagName 指定tag名称，优先以注解上值为准
+     * @param tagComment 指定tag注释，优先以注解上值为准
+     * @return
+     * @param <T>
+     */
+    public <T> boolean createTag(String space, Class<T> vertexClazz, String tagName, String tagComment) throws NebulaExecuteException;
+
+    /**
+     * 创建edge
+     * @param space
+     * @param edgeClazz
+     * @return
+     * @param <E>
+     */
+    public <E> boolean createEdge(String space, Class<E> edgeClazz) throws NebulaExecuteException;
+
+    /**
+     * 创建tag index
+     * @param space
+     * @param vertexClazz
+     * @param tagName 指定tag名称，优先以注解上值为准
+     * @return
+     * @param <T>
+     */
+    public <T> boolean createTagIndex(String space, Class<T> vertexClazz, String tagName) throws NebulaExecuteException;
+
+    /**
+     * 创建edge index
+     * @param space
+     * @param edgeClazz
+     * @return
+     * @param <E>
+     */
+    public <E> boolean createEdgeIndex(String space, Class<E> edgeClazz) throws NebulaExecuteException;
+
+    /**
+     * 创建space
+     * @param graphSpace
+     * @return
+     * @throws NebulaExecuteException
+     */
+    public boolean createSpace(GraphSpace graphSpace) throws NebulaExecuteException;
+
+    /**
+     * 克隆space
+     * @param existSpaceName
+     * @param newSpaceName
+     * @return
+     * @throws NebulaExecuteException
+     */
+    public boolean cloneSpace(String existSpaceName, String newSpaceName) throws NebulaExecuteException;
+
+    /**
+     * 清空space(只删除数据，保留schema)
+     * @param spaceName
+     * @return
+     * @throws NebulaExecuteException
+     */
+    public boolean clearSpace(String spaceName) throws NebulaExecuteException;
+
+    /**
+     * 删除space
+     * @param spaceName
+     * @return
+     * @throws NebulaExecuteException
+     */
+    public boolean dropSpace(String spaceName) throws NebulaExecuteException;
 }

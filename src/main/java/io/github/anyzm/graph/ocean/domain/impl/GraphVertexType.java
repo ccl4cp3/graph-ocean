@@ -34,6 +34,11 @@ public class GraphVertexType<T> extends AbstractGraphLabel {
     private String vertexName;
 
     /**
+     * 用于确定图类型tag的字段
+     */
+    private String vertexField;
+
+    /**
      * 主键策略
      */
     private GraphKeyPolicy graphKeyPolicy;
@@ -59,7 +64,7 @@ public class GraphVertexType<T> extends AbstractGraphLabel {
         this.vertexName = vertexName;
         this.typeClass = typeClass;
         this.propertyFormatMap = propertyFormatMap;
-        this.mustFields = mustFields;
+        this.mustProperties = mustFields;
         this.propertyFieldMap = propertyFieldMap;
         this.dataTypeMap = dataTypeMap;
         this.idAsField = idAsField;

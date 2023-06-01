@@ -40,6 +40,18 @@ public class GraphVertexTypeBuilder implements GraphLabelBuilder {
     }
 
     @Override
+    public GraphVertexTypeBuilder graphLabelComment(String graphLabelComment) {
+        this.graphVertexType.setComment(graphLabelComment);
+        return this;
+    }
+
+    @Override
+    public GraphVertexTypeBuilder graphLabelField(String graphLabelField) {
+        this.graphVertexType.setVertexField(graphLabelField);
+        return this;
+    }
+
+    @Override
     public GraphVertexTypeBuilder labelClass(Class labelClass) {
         this.graphVertexType.setTypeClass(labelClass);
         return this;
@@ -59,13 +71,25 @@ public class GraphVertexTypeBuilder implements GraphLabelBuilder {
 
     @Override
     public GraphVertexTypeBuilder mustProps(List<String> mustProps) {
-        this.graphVertexType.setMustFields(mustProps);
+        this.graphVertexType.setMustProperties(mustProps);
         return this;
     }
 
     @Override
     public GraphVertexTypeBuilder propertyFieldMap(Map<String, String> propertyFieldMap) {
         this.graphVertexType.setPropertyFieldMap(propertyFieldMap);
+        return this;
+    }
+
+    @Override
+    public GraphLabelBuilder propertyDefaultValueMap(Map<String, String> propertyDefaultValueMap) {
+        this.graphVertexType.setPropertyDefaultValueMap(propertyDefaultValueMap);
+        return this;
+    }
+
+    @Override
+    public GraphLabelBuilder propertyCommentMap(Map<String, String> propertyCommentMap) {
+        this.graphVertexType.setPropertyCommentMap(propertyCommentMap);
         return this;
     }
 

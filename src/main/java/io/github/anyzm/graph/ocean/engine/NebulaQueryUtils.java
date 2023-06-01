@@ -47,12 +47,12 @@ public class NebulaQueryUtils {
         }
     }
 
-    public static void yield(GraphTypeManager graphTypeManager, StringBuilder sqlBuilder, Class clazz, String... fields) {
-        yield(graphTypeManager, sqlBuilder, null, clazz, fields);
+    public static void yield(GraphTypeManager graphTypeManager, StringBuilder sqlBuilder, Class clazz, String... properties) {
+        yield(graphTypeManager, sqlBuilder, null, clazz, properties);
     }
 
-    public static void yield(GraphTypeManager graphTypeManager, StringBuilder sqlBuilder, String symbol, Class clazz, String... fields) {
-        yieldWithDistinct(false, graphTypeManager, sqlBuilder, symbol, clazz, fields);
+    public static void yield(GraphTypeManager graphTypeManager, StringBuilder sqlBuilder, String symbol, Class clazz, String... properties) {
+        yieldWithDistinct(false, graphTypeManager, sqlBuilder, symbol, clazz, properties);
     }
 
     public static void limit(StringBuilder sqlBuilder, int size) {
@@ -76,21 +76,21 @@ public class NebulaQueryUtils {
         yieldWithDistinct(sqlBuilder, fieldAlias, false);
     }
 
-    private static void yieldWithDistinct(boolean distinct, GraphTypeManager graphTypeManager, StringBuilder sqlBuilder, String prefix, Class clazz, String... fields) {
+    private static void yieldWithDistinct(boolean distinct, GraphTypeManager graphTypeManager, StringBuilder sqlBuilder, String prefix, Class clazz, String... properties) {
         GraphLabel graphLabel = graphTypeManager.getGraphLabel(clazz);
-        String name = graphLabel.getName();
         sqlBuilder.append(" yield ");
         if (distinct) {
             sqlBuilder.append("distinct ");
         }
-        for (String field : fields) {
-            String fieldName = graphLabel.getFieldName(field);
-            String propertyName = graphLabel.getPropertyName(fieldName);
+        // 使用属性函数代替标签名来支持动态
+        String name = graphLabel.isTag() ? "properties(vertex)" : "properties(edge)";
+        for (String property : properties) {
+            String fieldName = graphLabel.getFieldName(property);
             StringBuilder temp = new StringBuilder();
             if (StringUtils.isNotBlank(prefix)) {
                 temp.append(prefix);
             }
-            temp.append(name).append(".").append(fieldName).append(" as ").append(propertyName);
+            temp.append(name).append(".").append(property).append(" as ").append(fieldName);
             sqlBuilder.append(temp).append(",");
         }
         sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);

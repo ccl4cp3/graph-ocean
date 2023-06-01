@@ -29,13 +29,21 @@ public class DefaultGraphVertexTypeFactory implements GraphVertexTypeFactory {
         if (graphVertex == null) {
             return null;
         }
-        String vertexName = graphVertex.value();
+
         //主键策略：hash uuid string
         GraphKeyPolicy graphKeyPolicy = graphVertex.keyPolicy();
         boolean idAsField = graphVertex.idAsField();
         GraphVertexTypeBuilder builder = GraphVertexTypeBuilder.builder();
         GraphHelper.collectGraphProperties(builder, clazz, idAsField, idAsField);
-        return builder.graphKeyPolicy(graphKeyPolicy).idAsField(idAsField).graphLabelName(vertexName).labelClass(clazz).build();
+        String vertexName = graphVertex.value();
+        String vertexComment = graphVertex.comment();
+        return builder
+                .graphKeyPolicy(graphKeyPolicy)
+                .idAsField(idAsField)
+                .graphLabelName(vertexName)
+                .graphLabelComment(vertexComment)
+                .labelClass(clazz)
+                .build();
     }
 
 }

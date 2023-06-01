@@ -5,9 +5,10 @@
  */
 package io.github.anyzm.graph.ocean.session;
 
+import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import io.github.anyzm.graph.ocean.domain.Session;
 import io.github.anyzm.graph.ocean.exception.NebulaExecuteException;
-import com.vesoft.nebula.client.graph.data.ResultSet;
 
 /**
  * Description  NebulaSession is used for
@@ -20,13 +21,13 @@ public interface NebulaSession extends Session {
 
 
     /**
-     * 执行查询
+     * 执行sql
      *
      * @param statement 语句
      * @return 查询结果
-     * @throws NebulaExecuteException nebula执行异常
+     * @throws IOErrorException nebula执行异常
      */
-    public ResultSet executeQuery(String statement) throws NebulaExecuteException;
+    public ResultSet executeSql(String statement) throws IOErrorException;
 
 
 }

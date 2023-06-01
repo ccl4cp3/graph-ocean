@@ -8,6 +8,7 @@ package io.github.anyzm.graph.ocean.domain.impl;
 import com.google.common.base.Objects;
 import lombok.Getter;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -19,6 +20,10 @@ import java.util.Map;
 @ToString
 public class GraphVertexEntity<T> extends GraphPropertyEntity {
 
+    /**
+     * 顶点名称
+     */
+    private final String vertexName;
     /**
      * 顶点 id
      */
@@ -34,6 +39,12 @@ public class GraphVertexEntity<T> extends GraphPropertyEntity {
             throw new IllegalArgumentException("vertexTag or props not empty");
         }
         this.graphVertexType = graphVertexType;
+        // 优先使用类注解的值
+        if(StringUtils.isNotBlank(this.graphVertexType.getVertexName())) {
+            this.vertexName = this.graphVertexType.getVertexName();
+        }else {
+            this.vertexName = (String) props.remove(this.graphVertexType.getVertexField());
+        }
         this.id = id;
     }
 
