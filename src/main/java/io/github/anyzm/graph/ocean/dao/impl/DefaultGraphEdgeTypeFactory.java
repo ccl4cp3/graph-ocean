@@ -11,8 +11,8 @@ import io.github.anyzm.graph.ocean.dao.GraphEdgeTypeFactory;
 import io.github.anyzm.graph.ocean.dao.GraphVertexTypeFactory;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeType;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeTypeBuilder;
-import io.github.anyzm.graph.ocean.domain.impl.GraphVertexType;
 import io.github.anyzm.graph.ocean.enums.ErrorEnum;
+import io.github.anyzm.graph.ocean.enums.GraphKeyPolicy;
 import io.github.anyzm.graph.ocean.exception.CheckThrower;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
 
@@ -33,39 +33,26 @@ public class DefaultGraphEdgeTypeFactory implements GraphEdgeTypeFactory {
     }
 
     @Override
-    public <S, T, E> GraphEdgeType<S, T, E> buildGraphEdgeType(Class<E> clazz) throws NebulaException {
-        return buildGraphEdgeType(clazz, null, null);
-    }
-
-    @Override
-    public <S, T, E> GraphEdgeType<S, T, E> buildGraphEdgeType(Class<E> clazz, GraphVertexType<S> srcGraphVertexType,
-                                                               GraphVertexType<T> dstGraphVertexType) throws NebulaException {
+    public <E> GraphEdgeType<E> buildGraphEdgeType(Class<E> clazz) throws NebulaException {
         GraphEdge graphEdge = clazz.getAnnotation(GraphEdge.class);
         CheckThrower.ifTrueThrow(graphEdge == null, ErrorEnum.PARAMETER_NOT_NULL);
         String edgeName = graphEdge.value();
         String edgeComment = graphEdge.comment();
         boolean srcIdAsField = graphEdge.srcIdAsField();
         boolean dstIdAsField = graphEdge.dstIdAsField();
-        if (srcGraphVertexType == null) {
-            Class<S> srcVertex = graphEdge.srcVertex();
-            srcGraphVertexType = graphVertexTypeFactory.buildGraphVertexType(srcVertex);
-        }
-        if (dstGraphVertexType == null) {
-            Class<T> dstVertex = graphEdge.dstVertex();
-            dstGraphVertexType = graphVertexTypeFactory.buildGraphVertexType(dstVertex);
-        }
-        CheckThrower.ifTrueThrow(srcGraphVertexType == null || dstGraphVertexType == null, ErrorEnum.INVALID_VERTEX_TAG);
+        GraphKeyPolicy srcVertexGraphKeyPolicy = graphEdge.srcKeyPolicy();
+        GraphKeyPolicy dstVertexGraphKeyPolicy = graphEdge.dstKeyPolicy();
 
         GraphEdgeTypeBuilder builder = GraphEdgeTypeBuilder.builder();
         GraphHelper.collectGraphProperties(builder, clazz, srcIdAsField, dstIdAsField);
         return builder
                 .srcIdAsField(srcIdAsField)
                 .dstIdAsField(dstIdAsField)
+                .srcVertexGraphKeyPolicy(srcVertexGraphKeyPolicy)
+                .dstVertexGraphKeyPolicy(dstVertexGraphKeyPolicy)
                 .graphLabelName(edgeName)
                 .graphLabelComment(edgeComment)
                 .labelClass(clazz)
-                .srcGraphVertexType(srcGraphVertexType)
-                .dstGraphVertexType(dstGraphVertexType)
                 .build();
     }
 }

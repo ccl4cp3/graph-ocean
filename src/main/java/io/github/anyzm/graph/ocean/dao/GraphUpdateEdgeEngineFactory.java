@@ -24,13 +24,11 @@ public interface GraphUpdateEdgeEngineFactory {
     /**
      *
      * @param graphEdgeEntities 边实体
-     * @param <S> 起点
-     * @param <T> 终点
      * @param <E> 边
      * @return 边更新引擎
      * @throws NebulaException nebula异常
      */
-    public <S, T, E> EdgeUpdateEngine<S, T, E> build(List<GraphEdgeEntity<S, T, E>> graphEdgeEntities) throws NebulaException;
+    public <E> EdgeUpdateEngine<E> build(List<GraphEdgeEntity<E>> graphEdgeEntities) throws NebulaException;
 
 
     /**
@@ -40,13 +38,13 @@ public interface GraphUpdateEdgeEngineFactory {
      * @param srcGraphVertexEntities 起点实体
      * @param dstGraphVertexEntities 终点实体
      * @param <S> 起点
-     * @param <T> 终点
+     * @param <D> 终点
      * @param <E> 边
      * @return 边更新引擎
      * @throws NebulaException nebula异常
      */
-    public <S, T, E> EdgeUpdateEngine<S, T, E> build(List<GraphEdgeEntity<S, T, E>> graphEdgeEntities,
+    public <S, D, E> EdgeUpdateEngine<E> build(List<GraphEdgeEntity<E>> graphEdgeEntities,
                                                      List<GraphVertexEntity<S>> srcGraphVertexEntities,
-                                                     List<GraphVertexEntity<T>> dstGraphVertexEntities) throws NebulaException;
+                                                     List<GraphVertexEntity<D>> dstGraphVertexEntities) throws NebulaException;
 
 }

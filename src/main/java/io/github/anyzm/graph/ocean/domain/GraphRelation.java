@@ -6,7 +6,6 @@
 package io.github.anyzm.graph.ocean.domain;
 
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeEntity;
-import io.github.anyzm.graph.ocean.domain.impl.GraphVertexType;
 
 import java.util.List;
 
@@ -30,32 +29,11 @@ public interface GraphRelation<S, T, E> {
     String getDstId();
 
     /**
-     * 获取 VertexType
-     *
-     * @return 起点顶点类型
-     */
-    GraphVertexType<S> getSrcVertexType();
-
-    /**
-     * 获取 VertexType
-     *
-     * @return 终点顶点类型
-     */
-    GraphVertexType<E> getDstVertexType();
-
-    /**
-     * 获取关联的顶点
-     *
-     * @return
-     */
-    List<GraphVertexType> getVertices();
-
-    /**
      * 获取关联的边
      *
      * @return 获取关联的边实体列表
      */
-    List<GraphEdgeEntity<S, T, E>> getEdges();
+    List<GraphEdgeEntity<E>> getEdges();
 
     /**
      * 是否不考虑方向

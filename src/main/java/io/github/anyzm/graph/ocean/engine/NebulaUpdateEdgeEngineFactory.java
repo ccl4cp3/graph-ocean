@@ -25,14 +25,14 @@ import java.util.List;
 public class NebulaUpdateEdgeEngineFactory implements GraphUpdateEdgeEngineFactory {
 
     @Override
-    public <S, T, E> EdgeUpdateEngine<S, T, E> build(List<GraphEdgeEntity<S, T, E>> graphEdgeEntities) throws NebulaException {
+    public <E> EdgeUpdateEngine<E> build(List<GraphEdgeEntity<E>> graphEdgeEntities) throws NebulaException {
         return new NebulaBatchEdgesUpdate<>(graphEdgeEntities);
     }
 
     @Override
-    public <S, T, E> EdgeUpdateEngine<S, T, E> build(List<GraphEdgeEntity<S, T, E>> graphEdgeEntities,
+    public <S, D, E> EdgeUpdateEngine<E> build(List<GraphEdgeEntity<E>> graphEdgeEntities,
                                                      List<GraphVertexEntity<S>> srcGraphVertexEntities,
-                                                     List<GraphVertexEntity<T>> dstGraphVertexEntities) throws NebulaException {
+                                                     List<GraphVertexEntity<D>> dstGraphVertexEntities) throws NebulaException {
         return new NebulaBatchEdgesUpdate<>(graphEdgeEntities, srcGraphVertexEntities, dstGraphVertexEntities);
     }
 

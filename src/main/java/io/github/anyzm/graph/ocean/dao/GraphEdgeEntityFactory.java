@@ -18,12 +18,10 @@ public interface GraphEdgeEntityFactory {
     /**
      *
      * @param input 边对象
-     * @param <S> 起点
-     * @param <T> 终点
      * @param <E> 边
      * @return GraphEdgeEntity
      * @throws NebulaException nebula异常
      */
-    public <S, T, E> GraphEdgeEntity<S, T, E> buildGraphEdgeEntity(E input) throws NebulaException;
+    public <E> GraphEdgeEntity<E> buildGraphEdgeEntity(E input) throws NebulaException;
 
 }

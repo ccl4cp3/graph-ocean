@@ -47,13 +47,13 @@ public interface GraphMapper {
      * @param srcVertexEntityFunction 起点构造器
      * @param dstVertexEntityFunction 终点构造器
      * @param <S> 起点
-     * @param <T> 终点
+     * @param <D> 终点
      * @param <E> 边
      * @return 更新状态码
      * @throws NebulaException nebula异常
      */
-    public <S, T, E> int saveEdgeEntitiesWithVertex(List<E> entities, Function<String, S> srcVertexEntityFunction,
-                                                    Function<String, T> dstVertexEntityFunction) throws NebulaException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException;
+    public <S, D, E> int saveEdgeEntitiesWithVertex(List<E> entities, Function<String, S> srcVertexEntityFunction,
+                                                    Function<String, D> dstVertexEntityFunction) throws NebulaException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException;
 
 
     /**
@@ -63,7 +63,7 @@ public interface GraphMapper {
      * @return 更新状态码
      * @throws NebulaException nebula异常
      */
-    public <S, T, E> int saveEdgeEntities(List<E> entities) throws NebulaException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException;
+    public <E> int saveEdgeEntities(List<E> entities) throws NebulaException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException;
 
 
     /**

@@ -53,7 +53,7 @@ public class DefaultGraphTypeManager implements GraphTypeManager {
     }
 
     @Override
-    public <S, T, E> GraphEdgeType<S, T, E> getGraphEdgeType(Class<E> clazz) throws NebulaException {
+    public <E> GraphEdgeType<E> getGraphEdgeType(Class<E> clazz) throws NebulaException {
         if (clazz == null) {
             return null;
         }
@@ -61,23 +61,13 @@ public class DefaultGraphTypeManager implements GraphTypeManager {
         if (graphEdgeType != null) {
             return graphEdgeType;
         }
-        GraphEdge graphEdge = (GraphEdge) clazz.getAnnotation(GraphEdge.class);
+        GraphEdge graphEdge = clazz.getAnnotation(GraphEdge.class);
         if (graphEdge == null) {
             return null;
         }
-        Class srcVertexClass = graphEdge.srcVertex();
-        Class dstVertexClass = graphEdge.dstVertex();
-        GraphVertexType srcGraphVertexType = graphTypeCache.getGraphVertexType(srcVertexClass);
-        GraphVertexType dstGraphVertexType = graphTypeCache.getGraphVertexType(dstVertexClass);
-        graphEdgeType = graphEdgeTypeFactory.buildGraphEdgeType(clazz, srcGraphVertexType,
-                dstGraphVertexType);
+
+        graphEdgeType = graphEdgeTypeFactory.buildGraphEdgeType(clazz);
         graphTypeCache.putGraphEdgeType(clazz, graphEdgeType);
-        if (srcGraphVertexType == null) {
-            graphTypeCache.putGraphVertexType(graphEdgeType.getSrcVertexType().getTypeClass(), graphEdgeType.getSrcVertexType());
-        }
-        if (dstGraphVertexType == null) {
-            graphTypeCache.putGraphVertexType(graphEdgeType.getDstVertexType().getTypeClass(), graphEdgeType.getDstVertexType());
-        }
         return graphEdgeType;
     }
 

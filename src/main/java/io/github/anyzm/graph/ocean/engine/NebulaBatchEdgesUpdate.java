@@ -13,7 +13,6 @@ import io.github.anyzm.graph.ocean.domain.GraphLabel;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeEntity;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeType;
 import io.github.anyzm.graph.ocean.domain.impl.GraphVertexEntity;
-import io.github.anyzm.graph.ocean.domain.impl.GraphVertexType;
 import io.github.anyzm.graph.ocean.enums.ErrorEnum;
 import io.github.anyzm.graph.ocean.enums.GraphDataTypeEnum;
 import io.github.anyzm.graph.ocean.exception.CheckThrower;
@@ -24,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 批量边更新引擎
@@ -31,68 +31,32 @@ import java.util.Set;
  * @author Anyzm
  * date 2020/3/30
  */
-public class NebulaBatchEdgesUpdate<S, T, E> implements EdgeUpdateEngine<S, T, E> {
+public class NebulaBatchEdgesUpdate<S,D,E> implements EdgeUpdateEngine<E> {
 
-    private static final String UPSET_SQL_FORMAT = "UPSERT EDGE %s->%s of %s SET %s";
+    private static final String UPSET_SQL_FORMAT = "UPSERT EDGE ON %s %s -> %s SET %s";
 
-    /**
-     * 仅生成边的更新sql
-     */
-    private boolean isOnlyGenerateEdgeSql = true;
-
-    private List<GraphEdgeEntity<S, T, E>> graphEdgeEntities;
-
-    private GraphVertexType<S> srcGraphVertexType;
-
-    private GraphVertexType<T> dstGraphVertexType;
+    private List<GraphEdgeEntity<E>> graphEdgeEntities;
 
     private List<GraphVertexEntity<S>> srcGraphVertexEntities;
 
-    private List<GraphVertexEntity<T>> dstGraphVertexEntities;
+    private List<GraphVertexEntity<D>> dstGraphVertexEntities;
 
-    public NebulaBatchEdgesUpdate(List<GraphEdgeEntity<S, T, E>> graphEdgeEntities) throws NebulaException {
-        this.graphEdgeEntities = graphEdgeEntities;
+    public NebulaBatchEdgesUpdate(List<GraphEdgeEntity<E>> graphEdgeEntities) throws NebulaException {
         CheckThrower.ifTrueThrow(CollectionUtils.isEmpty(graphEdgeEntities), ErrorEnum.UPDATE_FIELD_DATA_NOT_EMPTY);
-        this.srcGraphVertexType = graphEdgeEntities.get(0).getSrcVertexType();
-        this.dstGraphVertexType = graphEdgeEntities.get(0).getDstVertexType();
-        this.isOnlyGenerateEdgeSql = true;
+        this.graphEdgeEntities = graphEdgeEntities;
     }
 
-    public NebulaBatchEdgesUpdate(List<GraphEdgeEntity<S, T, E>> graphEdgeEntities, List<GraphVertexEntity<S>> srcGraphVertexEntities,
-                                  List<GraphVertexEntity<T>> dstGraphVertexEntities) throws NebulaException {
-        this.graphEdgeEntities = graphEdgeEntities;
+    public NebulaBatchEdgesUpdate(List<GraphEdgeEntity<E>> graphEdgeEntities, List<GraphVertexEntity<S>> srcGraphVertexEntities,
+                                  List<GraphVertexEntity<D>> dstGraphVertexEntities) throws NebulaException {
         CheckThrower.ifTrueThrow(CollectionUtils.isEmpty(graphEdgeEntities), ErrorEnum.UPDATE_FIELD_DATA_NOT_EMPTY);
+        this.graphEdgeEntities = graphEdgeEntities;
         this.srcGraphVertexEntities = srcGraphVertexEntities;
         this.dstGraphVertexEntities = dstGraphVertexEntities;
-        this.srcGraphVertexType = graphEdgeEntities.get(0).getSrcVertexType();
-        this.dstGraphVertexType = graphEdgeEntities.get(0).getDstVertexType();
-        this.isOnlyGenerateEdgeSql = false;
     }
-
-
-    private List<String> getDstVertexSql() throws NebulaException {
-        if (CollectionUtils.isNotEmpty(dstGraphVertexEntities)) {
-            NebulaBatchVertexUpdate nebulaUpdateBatchVertex = new NebulaBatchVertexUpdate(dstGraphVertexEntities);
-            return nebulaUpdateBatchVertex.getSqlList();
-        }
-        return Collections.emptyList();
-    }
-
-    private List<String> getSrcVertexSql() throws NebulaException {
-        if (CollectionUtils.isNotEmpty(this.srcGraphVertexEntities)) {
-            NebulaBatchVertexUpdate nebulaUpdateBatchVertex = new NebulaBatchVertexUpdate(this.srcGraphVertexEntities);
-            return nebulaUpdateBatchVertex.getSqlList();
-        }
-        return Collections.emptyList();
-    }
-
 
     @Override
     public List<String> getSqlList() throws NebulaException {
         List<String> sqlList = getEdgeSql();
-        if (isOnlyGenerateEdgeSql) {
-            return sqlList;
-        }
         sqlList.addAll(this.getSrcVertexSql());
         sqlList.addAll(this.getDstVertexSql());
         return sqlList;
@@ -104,6 +68,22 @@ public class NebulaBatchEdgesUpdate<S, T, E> implements EdgeUpdateEngine<S, T, E
             return Lists.newArrayList(sql);
         }
         return getMultiSql();
+    }
+
+    private List<String> getSrcVertexSql() throws NebulaException {
+        if (CollectionUtils.isNotEmpty(this.srcGraphVertexEntities)) {
+            NebulaBatchVertexUpdate<S> nebulaUpdateBatchVertex = new NebulaBatchVertexUpdate(this.srcGraphVertexEntities);
+            return nebulaUpdateBatchVertex.getSqlList();
+        }
+        return Collections.emptyList();
+    }
+
+    private List<String> getDstVertexSql() throws NebulaException {
+        if (CollectionUtils.isNotEmpty(dstGraphVertexEntities)) {
+            NebulaBatchVertexUpdate<D> nebulaUpdateBatchVertex = new NebulaBatchVertexUpdate(dstGraphVertexEntities);
+            return nebulaUpdateBatchVertex.getSqlList();
+        }
+        return Collections.emptyList();
     }
 
     /**
@@ -122,14 +102,14 @@ public class NebulaBatchEdgesUpdate<S, T, E> implements EdgeUpdateEngine<S, T, E
      */
     private List<String> getMultiSql() throws NebulaException {
         List<String> sqlList = Lists.newArrayListWithExpectedSize(this.graphEdgeEntities.size());
-        for (GraphEdgeEntity<S, T, E> graphEdgeEntity : this.graphEdgeEntities) {
+        for (GraphEdgeEntity<E> graphEdgeEntity : this.graphEdgeEntities) {
             String sql = generateSql(graphEdgeEntity);
             sqlList.add(sql);
         }
         return StringUtil.aggregate(sqlList, sqlList.size(), ";");
     }
 
-    private String generateSql(GraphEdgeEntity<S, T, E> graphEdgeEntity) throws NebulaException {
+    private String generateSql(GraphEdgeEntity<E> graphEdgeEntity) throws NebulaException {
         String src = GraphHelper.getQuerySrcId(graphEdgeEntity.getGraphEdgeType(), graphEdgeEntity.getSrcId());
         String end = GraphHelper.getQueryDstId(graphEdgeEntity.getGraphEdgeType(), graphEdgeEntity.getDstId());
         Set<Map.Entry<String, Object>> entries = graphEdgeEntity.getProps().entrySet();
@@ -148,27 +128,30 @@ public class NebulaBatchEdgesUpdate<S, T, E> implements EdgeUpdateEngine<S, T, E
             }
         }
         String sqlFieldSet = sqlBuilder.delete(0, 1).toString();
-        return String.format(UPSET_SQL_FORMAT, src, end, graphEdgeEntity.getGraphEdgeType().getEdgeName(), sqlFieldSet);
+        return String.format(UPSET_SQL_FORMAT, graphEdgeEntity.getGraphEdgeType().getEdgeName(), src, end, sqlFieldSet);
     }
 
 
     @Override
-    public List<GraphEdgeEntity<S, T, E>> getGraphEdgeEntityList() {
+    public List<GraphEdgeEntity<E>> getGraphEdgeEntityList() {
         return this.graphEdgeEntities;
     }
 
     @Override
-    public GraphEdgeType<S, T, E> getGraphEdgeType() {
+    public GraphEdgeType<E> getGraphEdgeType() {
         return this.graphEdgeEntities.get(0).getGraphEdgeType();
     }
 
     @Override
     public List<GraphLabel> getLabels() {
         List<GraphLabel> list = Lists.newArrayList();
-        GraphEdgeType<S, T, E> graphEdgeType = this.getGraphEdgeType();
-        list.add(graphEdgeType);
-        list.add(graphEdgeType.getSrcVertexType());
-        list.add(graphEdgeType.getDstVertexType());
+        list.add(this.getGraphEdgeType());
+        if(CollectionUtils.isNotEmpty(srcGraphVertexEntities)) {
+            list.addAll(srcGraphVertexEntities.stream().map(GraphVertexEntity::getGraphVertexType).collect(Collectors.toList()));
+        }
+        if(CollectionUtils.isNotEmpty(dstGraphVertexEntities)) {
+            list.addAll(dstGraphVertexEntities.stream().map(GraphVertexEntity::getGraphVertexType).collect(Collectors.toList()));
+        }
         return list;
     }
 

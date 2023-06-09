@@ -86,13 +86,13 @@ public class GraphHelper {
 
     public static String getQuerySrcId(GraphEdgeType edgeType, String vertexKey) {
         String vertexIdKey = edgeType.getSrcIdKey(vertexKey);
-        GraphKeyPolicy graphKeyPolicy = edgeType.getSrcVertexType().getGraphKeyPolicy();
+        GraphKeyPolicy graphKeyPolicy = edgeType.getSrcVertexGraphKeyPolicy();
         return generateKeyPolicy(graphKeyPolicy, vertexIdKey);
     }
 
     public static String getQueryDstId(GraphEdgeType edgeType, String vertexKey) {
         String vertexIdKey = edgeType.getDstIdKey(vertexKey);
-        GraphKeyPolicy graphKeyPolicy = edgeType.getDstVertexType().getGraphKeyPolicy();
+        GraphKeyPolicy graphKeyPolicy = edgeType.getDstVertexGraphKeyPolicy();
         return generateKeyPolicy(graphKeyPolicy, vertexIdKey);
     }
 

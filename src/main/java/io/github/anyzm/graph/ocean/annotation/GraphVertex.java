@@ -31,7 +31,7 @@ public @interface GraphVertex {
      *
      * @return 主键生成方法
      */
-    GraphKeyPolicy keyPolicy();
+    GraphKeyPolicy keyPolicy() default GraphKeyPolicy.string_key;
 
     /**
      *

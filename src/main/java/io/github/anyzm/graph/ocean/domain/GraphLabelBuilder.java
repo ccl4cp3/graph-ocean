@@ -6,7 +6,6 @@
 package io.github.anyzm.graph.ocean.domain;
 
 import io.github.anyzm.graph.ocean.dao.GraphValueFormatter;
-import io.github.anyzm.graph.ocean.domain.impl.GraphVertexType;
 import io.github.anyzm.graph.ocean.enums.GraphDataTypeEnum;
 import io.github.anyzm.graph.ocean.enums.GraphKeyPolicy;
 
@@ -160,18 +159,18 @@ public interface GraphLabelBuilder {
     /**
      * 构造起点顶点类型
      *
-     * @param srcGraphVertexType 起点顶点类型
+     * @param srcVertexGraphKeyPolicy 起点顶点主键策略
      * @return 标签构造器
      */
-    public GraphLabelBuilder srcGraphVertexType(GraphVertexType srcGraphVertexType);
+    public GraphLabelBuilder srcVertexGraphKeyPolicy(GraphKeyPolicy srcVertexGraphKeyPolicy);
 
     /**
      * 构造目标顶点类型
      *
-     * @param dstGraphVertexType 终点顶点类型
+     * @param dstVertexGraphKeyPolicy 终点顶点主键策略
      * @return 标签构造器
      */
-    public GraphLabelBuilder dstGraphVertexType(GraphVertexType dstGraphVertexType);
+    public GraphLabelBuilder dstVertexGraphKeyPolicy(GraphKeyPolicy dstVertexGraphKeyPolicy);
 
     /**
      * 构造出真实的元素

@@ -5,13 +5,12 @@
  */
 package io.github.anyzm.graph.ocean.domain.impl;
 
-import io.github.anyzm.graph.ocean.domain.GraphRelation;
 import com.google.common.base.Objects;
+import io.github.anyzm.graph.ocean.domain.GraphRelation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +21,7 @@ import java.util.Map;
  */
 @Getter
 @ToString
-public class GraphEdgeEntity<S, T, E> extends GraphPropertyEntity implements GraphRelation {
+public class GraphEdgeEntity<E> extends GraphPropertyEntity implements GraphRelation {
     /**
      * 起点 id
      */
@@ -32,17 +31,7 @@ public class GraphEdgeEntity<S, T, E> extends GraphPropertyEntity implements Gra
      */
     private final String dstId;
 
-    private final GraphEdgeType<S, T, E> graphEdgeType;
-
-    /**
-     * 起点
-     */
-    private final GraphVertexType<S> srcVertexType;
-
-    /**
-     * 目标顶点
-     */
-    private final GraphVertexType<T> dstVertexType;
+    private final GraphEdgeType<E> graphEdgeType;
 
     @Setter
     private int level = 0;
@@ -54,9 +43,8 @@ public class GraphEdgeEntity<S, T, E> extends GraphPropertyEntity implements Gra
     public int getHashCode() {
         String startId = this.getSrcId();
         String endId = this.getDstId();
-        GraphVertexType srcVertex = this.getSrcVertexType();
-        GraphVertexType endVertex = this.getDstVertexType();
-        return Objects.hashCode(startId, endId, srcVertex, endVertex);
+        String edgeName = this.graphEdgeType.getEdgeName();
+        return Objects.hashCode(startId, endId, edgeName);
     }
 
     @Override
@@ -67,35 +55,28 @@ public class GraphEdgeEntity<S, T, E> extends GraphPropertyEntity implements Gra
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        GraphRelation graphRelation = (GraphRelation) o;
+        GraphEdgeEntity graphEdgeEntity = (GraphEdgeEntity) o;
 
         String startId = this.getSrcId();
         String endId = this.getDstId();
-        GraphVertexType srcVertex = getSrcVertexType();
-        GraphVertexType endVertex = this.getDstVertexType();
-        return startId.equals(graphRelation.getSrcId()) &&
-                endId.equals(graphRelation.getDstId()) && Objects.equal(srcVertex, graphRelation.getSrcVertexType()) &&
-                Objects.equal(endVertex, graphRelation.getDstVertexType());
+        String edgeName = this.graphEdgeType.getEdgeName();
+        return startId.equals(graphEdgeEntity.getSrcId()) &&
+                endId.equals(graphEdgeEntity.getDstId())
+                && edgeName.equals(graphEdgeEntity.getGraphEdgeType().getEdgeName());
     }
 
-    public GraphEdgeEntity(GraphEdgeType<S, T, E> graphEdgeType, String srcId, String dstId,
-                           GraphVertexType<S> srcVertex, GraphVertexType<T> dstVertex, Map<String, Object> props) {
+    public GraphEdgeEntity(GraphEdgeType<E> graphEdgeType, String srcId, String dstId, Map<String, Object> props) {
         super(props);
         this.graphEdgeType = graphEdgeType;
         this.srcId = srcId;
         this.dstId = dstId;
-        this.srcVertexType = srcVertex;
-        this.dstVertexType = dstVertex;
     }
 
-    public GraphEdgeEntity(GraphEdgeType<S, T, E> graphEdgeType, String srcId,
-                           String dstId, GraphVertexType<S> srcVertex, GraphVertexType<T> dstVertex) {
+    public GraphEdgeEntity(GraphEdgeType<E> graphEdgeType, String srcId, String dstId) {
         super(Collections.emptyMap());
         this.graphEdgeType = graphEdgeType;
         this.srcId = srcId;
         this.dstId = dstId;
-        this.srcVertexType = srcVertex;
-        this.dstVertexType = dstVertex;
     }
 
     @Override
@@ -106,11 +87,6 @@ public class GraphEdgeEntity<S, T, E> extends GraphPropertyEntity implements Gra
     @Override
     public int hashCode() {
         return this.getHashCode();
-    }
-
-    @Override
-    public List<GraphVertexType> getVertices() {
-        return Arrays.asList(this.srcVertexType, this.dstVertexType);
     }
 
     @Override

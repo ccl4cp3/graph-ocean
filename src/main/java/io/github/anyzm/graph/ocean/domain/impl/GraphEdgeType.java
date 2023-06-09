@@ -8,6 +8,7 @@ package io.github.anyzm.graph.ocean.domain.impl;
 import io.github.anyzm.graph.ocean.dao.GraphValueFormatter;
 import io.github.anyzm.graph.ocean.domain.AbstractGraphLabel;
 import io.github.anyzm.graph.ocean.enums.GraphDataTypeEnum;
+import io.github.anyzm.graph.ocean.enums.GraphKeyPolicy;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,18 +24,19 @@ import java.util.Map;
  */
 @Setter
 @Getter
-public class GraphEdgeType<S, T, E> extends AbstractGraphLabel {
+public class GraphEdgeType<E> extends AbstractGraphLabel {
 
     private String edgeName;
 
     /**
-     * 起点顶点类型
+     * 起点顶点主键策略
      */
-    private GraphVertexType<S> srcVertexType;
+    private GraphKeyPolicy srcVertexGraphKeyPolicy;
+
     /**
-     * 终点顶点类型
+     * 起终点顶点主键策略
      */
-    private GraphVertexType<T> dstVertexType;
+    private GraphKeyPolicy dstVertexGraphKeyPolicy;
 
     private Class<E> edgeClass;
 
@@ -51,17 +53,18 @@ public class GraphEdgeType<S, T, E> extends AbstractGraphLabel {
 
     private GraphEdgeType(String edgeName, Class<E> edgeClass, List<String> mustFields, Map<String, String> propertyFieldMap,
                           Map<String, GraphValueFormatter> propertyFormatMap, Map<String, GraphDataTypeEnum> dataTypeMap,
-                          GraphVertexType<S> srcVertexType, GraphVertexType<T> dstVertexType, boolean srcIdAsField, boolean dstIdAsField) {
+                          GraphKeyPolicy srcVertexGraphKeyPolicy, GraphKeyPolicy dstVertexGraphKeyPolicy,
+                          boolean srcIdAsField, boolean dstIdAsField) {
         this.edgeName = edgeName;
         this.edgeClass = edgeClass;
         this.mustProperties = mustFields;
         this.propertyFieldMap = propertyFieldMap;
         this.propertyFormatMap = propertyFormatMap;
-        this.srcVertexType = srcVertexType;
-        this.dstVertexType = dstVertexType;
         this.dataTypeMap = dataTypeMap;
         this.srcIdAsField = srcIdAsField;
         this.dstIdAsField = dstIdAsField;
+        this.srcVertexGraphKeyPolicy = srcVertexGraphKeyPolicy;
+        this.dstVertexGraphKeyPolicy = dstVertexGraphKeyPolicy;
     }
 
     /**

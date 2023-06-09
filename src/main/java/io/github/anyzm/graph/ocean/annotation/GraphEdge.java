@@ -5,6 +5,8 @@
  */
 package io.github.anyzm.graph.ocean.annotation;
 
+import io.github.anyzm.graph.ocean.enums.GraphKeyPolicy;
+
 import java.lang.annotation.*;
 
 /**
@@ -26,15 +28,15 @@ public @interface GraphEdge {
 
     /**
      *
-     * @return 边起点类
+     * @return 边起点主键生成方法
      */
-    Class srcVertex();
+    GraphKeyPolicy srcKeyPolicy() default GraphKeyPolicy.string_key;
 
     /**
      *
-     * @return 边终点类
+     * @return 边终点主键生成方法
      */
-    Class dstVertex();
+    GraphKeyPolicy dstKeyPolicy() default GraphKeyPolicy.string_key;
 
     /**
      *

@@ -34,7 +34,7 @@ public interface GraphTypeManager {
      * @return 顶点类型
      * @throws NebulaException 构造异常
      */
-    public <S, T, E> GraphEdgeType<S, T, E> getGraphEdgeType(Class<E> clazz) throws NebulaException;
+    public <E> GraphEdgeType<E> getGraphEdgeType(Class<E> clazz) throws NebulaException;
 
     /**
      * @param clazz 类类型

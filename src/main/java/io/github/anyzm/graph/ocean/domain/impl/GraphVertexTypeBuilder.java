@@ -132,12 +132,12 @@ public class GraphVertexTypeBuilder implements GraphLabelBuilder {
     }
 
     @Override
-    public GraphVertexTypeBuilder srcGraphVertexType(GraphVertexType srcGraphVertexType) {
+    public GraphVertexTypeBuilder srcVertexGraphKeyPolicy(GraphKeyPolicy srcVertexGraphKeyPolicy) {
         return this;
     }
 
     @Override
-    public GraphVertexTypeBuilder dstGraphVertexType(GraphVertexType dstGraphVertexType) {
+    public GraphVertexTypeBuilder dstVertexGraphKeyPolicy(GraphKeyPolicy dstVertexGraphKeyPolicy) {
         return this;
     }
 

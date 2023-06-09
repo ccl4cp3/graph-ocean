@@ -18,19 +18,19 @@ import java.util.List;
  * Date  2021/7/16 - 17:08
  * @version 1.0.0
  */
-public interface EdgeUpdateEngine<S, T, E> extends GraphUpdateEngine {
+public interface EdgeUpdateEngine<E> extends GraphUpdateEngine {
 
     /**
      *
      * @return 获取边实体
      */
-    public List<GraphEdgeEntity<S, T, E>> getGraphEdgeEntityList();
+    public List<GraphEdgeEntity<E>> getGraphEdgeEntityList();
 
     /**
      *
      * @return 获取边类型
      */
-    public GraphEdgeType<S, T, E> getGraphEdgeType();
+    public GraphEdgeType<E> getGraphEdgeType();
 
 
 }

@@ -12,7 +12,6 @@ import io.github.anyzm.graph.ocean.dao.GraphEdgeEntityFactory;
 import io.github.anyzm.graph.ocean.dao.GraphTypeManager;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeEntity;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeType;
-import io.github.anyzm.graph.ocean.domain.impl.GraphVertexType;
 import io.github.anyzm.graph.ocean.enums.ErrorEnum;
 import io.github.anyzm.graph.ocean.enums.GraphPropertyTypeEnum;
 import io.github.anyzm.graph.ocean.exception.CheckThrower;
@@ -41,8 +40,8 @@ public class DefaultGraphEdgeEntityFactory implements GraphEdgeEntityFactory {
         this.graphTypeManager = graphTypeManager;
     }
 
-    private <S, T, E> Pair<String, String> collectEdgeEntityProperties(E input, Field[] declaredFields,
-                                                                       GraphEdgeType<S, T, E> graphEdgeType,
+    private <E> Pair<String, String> collectEdgeEntityProperties(E input, Field[] declaredFields,
+                                                                       GraphEdgeType<E> graphEdgeType,
                                                                        Map<String, Object> propertyMap) {
         String srcId = null;
         String dstId = null;
@@ -73,19 +72,16 @@ public class DefaultGraphEdgeEntityFactory implements GraphEdgeEntityFactory {
     }
 
     @Override
-    public <S, T, E> GraphEdgeEntity<S, T, E> buildGraphEdgeEntity(E input) throws NebulaException {
+    public <E> GraphEdgeEntity<E> buildGraphEdgeEntity(E input) throws NebulaException {
         if (input == null) {
             return null;
         }
         Class<E> inputClass = (Class<E>) input.getClass();
-        GraphEdgeType<S, T, E> graphEdgeType = graphTypeManager.getGraphEdgeType(inputClass);
+        GraphEdgeType<E> graphEdgeType = graphTypeManager.getGraphEdgeType(inputClass);
         if (graphEdgeType == null) {
             return null;
         }
-        //起点类型
-        GraphVertexType<?> srcVertexType = graphEdgeType.getSrcVertexType();
-        //终点类型
-        GraphVertexType<?> dstVertexType = graphEdgeType.getDstVertexType();
+
         Field[] declaredFields = inputClass.getDeclaredFields();
         String srcId = null;
         String dstId = null;
@@ -104,6 +100,6 @@ public class DefaultGraphEdgeEntityFactory implements GraphEdgeEntityFactory {
         }
         CheckThrower.ifTrueThrow(StringUtils.isBlank(srcId) || StringUtils.isBlank(dstId),
                 ErrorEnum.INVALID_ID);
-        return new GraphEdgeEntity(graphEdgeType, srcId, dstId, srcVertexType, dstVertexType, propertyMap);
+        return new GraphEdgeEntity(graphEdgeType, srcId, dstId, propertyMap);
     }
 }

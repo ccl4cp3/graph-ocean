@@ -24,18 +24,6 @@ public interface GraphEdgeTypeFactory {
      * @return 边类型
      * @throws NebulaException 执行异常
      */
-    public <S, T, E> GraphEdgeType<S, T, E> buildGraphEdgeType(Class<E> clazz) throws NebulaException;
-
-
-    /**
-     *
-     * @param clazz  类类型
-     * @param srcGraphVertexType 起点类型type
-     * @param dstGraphVertexType 终点类型type
-     * @return  边类型
-     * @throws NebulaException 构建异常
-     */
-    public <S, T, E> GraphEdgeType<S, T, E> buildGraphEdgeType(Class<E> clazz, GraphVertexType<S> srcGraphVertexType,
-                                                               GraphVertexType<T> dstGraphVertexType) throws NebulaException;
+    public <E> GraphEdgeType<E> buildGraphEdgeType(Class<E> clazz) throws NebulaException;
 
 }

@@ -47,8 +47,8 @@ public class NebulaSchemaManager {
         return String.format(SQL_DROP_SPACE, spaceName);
     }
 
-    public static <S, T, E> String buildCreateEdgeIndexSql(Class<E> clazz) {
-        GraphEdgeType<S, T, E> edgeType = graphTypeManager.getGraphEdgeType(clazz);
+    public static <E> String buildCreateEdgeIndexSql(Class<E> clazz) {
+        GraphEdgeType<E> edgeType = graphTypeManager.getGraphEdgeType(clazz);
         if(null == edgeType) {
             throw new NebulaException(ErrorEnum.NOT_SUPPORT_EDGE_TAG);
         }
@@ -58,8 +58,8 @@ public class NebulaSchemaManager {
         return String.format(SQL_CREATE_EDGE_INDEX, edgeName, edgeName);
     }
 
-    public static <S, T, E> String buildCreateEdgeSql(Class<E> clazz){
-        GraphEdgeType<S, T, E> edgeType = graphTypeManager.getGraphEdgeType(clazz);
+    public static <E> String buildCreateEdgeSql(Class<E> clazz){
+        GraphEdgeType<E> edgeType = graphTypeManager.getGraphEdgeType(clazz);
         if(null == edgeType) {
             throw new NebulaException(ErrorEnum.NOT_SUPPORT_EDGE_TAG);
         }

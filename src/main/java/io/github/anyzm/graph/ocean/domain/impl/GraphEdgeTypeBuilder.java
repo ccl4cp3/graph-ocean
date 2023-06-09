@@ -137,14 +137,14 @@ public class GraphEdgeTypeBuilder implements GraphLabelBuilder {
     }
 
     @Override
-    public GraphEdgeTypeBuilder srcGraphVertexType(GraphVertexType srcGraphVertexType) {
-        this.graphEdgeType.setSrcVertexType(srcGraphVertexType);
+    public GraphEdgeTypeBuilder srcVertexGraphKeyPolicy(GraphKeyPolicy srcVertexGraphKeyPolicy) {
+        this.graphEdgeType.setSrcVertexGraphKeyPolicy(srcVertexGraphKeyPolicy);
         return this;
     }
 
     @Override
-    public GraphEdgeTypeBuilder dstGraphVertexType(GraphVertexType dstGraphVertexType) {
-        this.graphEdgeType.setDstVertexType(dstGraphVertexType);
+    public GraphEdgeTypeBuilder dstVertexGraphKeyPolicy(GraphKeyPolicy dstVertexGraphKeyPolicy) {
+        this.graphEdgeType.setDstVertexGraphKeyPolicy(dstVertexGraphKeyPolicy);
         return this;
     }
 
