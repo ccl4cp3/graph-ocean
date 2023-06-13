@@ -342,20 +342,18 @@ public class NebulaGraphMapper implements GraphMapper {
         return executeSchemaSql(sql);
     }
 
+    /**
+     * 执行schema变更语句服务端异步执行，需要等待20秒之后才能执行其他操作
+     * @param sql
+     * @return
+     * @throws NebulaExecuteException
+     */
     private boolean executeSchemaSql(String sql) throws NebulaExecuteException {
         NebulaSessionWrapper session = null;
         try {
             session = nebulaPoolSessionManager.getSession();
-            boolean success = session.executeDdl(String.format(SQL, space, sql));
-            // 创建异步实现，需要等待2个心跳周期(20s)
-            if(success) {
-                Thread.sleep(20000);
-            }
-            return success;
-        } catch (InterruptedException e) {
-            // ignore;
-            return true;
-        } catch (IOErrorException|ClientServerIncompatibleException|NotValidConnectionException e) {
+            return session.executeDdl(sql);
+        }catch (IOErrorException|ClientServerIncompatibleException|NotValidConnectionException e) {
             throw new NebulaExecuteException(ErrorCode.E_RPC_FAILURE.getValue(), e.getMessage(), e);
         } catch (AuthFailedException e) {
             throw new NebulaExecuteException(ErrorCode.E_PRIVILEGE_ACTION_INVALID.getValue(), e.getMessage(), e);

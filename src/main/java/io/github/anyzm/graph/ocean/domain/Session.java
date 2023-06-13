@@ -6,6 +6,7 @@
 package io.github.anyzm.graph.ocean.domain;
 
 
+import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import io.github.anyzm.graph.ocean.domain.impl.QueryResult;
 import io.github.anyzm.graph.ocean.exception.NebulaExecuteException;
 
@@ -43,7 +44,7 @@ public interface Session {
      * @return
      * @throws NebulaExecuteException
      */
-    public boolean executeDdl(String ddlSql);
+    public boolean executeDdl(String ddlSql) throws IOErrorException;
 
     /**
      * 释放session

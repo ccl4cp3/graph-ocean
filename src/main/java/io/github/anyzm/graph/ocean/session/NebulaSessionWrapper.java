@@ -81,20 +81,15 @@ public class NebulaSessionWrapper implements NebulaSession {
     }
 
     @Override
-    public boolean executeDdl(String ddlSql) {
-        try {
-            ResultSet resultSet = executeSql(ddlSql);
-            if(resultSet.isSucceeded()) {
-                return true;
-            }
-
-            log.error("nebula schema操作异常 code:{}, msg:{}, nGql:{} ",
-                    resultSet.getErrorCode(), resultSet.getErrorMessage(), ddlSql);
-            return false;
-        } catch (Exception e) {
-            log.error("nebula schema操作异常 Thrift rpc call failed: {}", e.getMessage());
-            return false;
+    public boolean executeDdl(String ddlSql) throws IOErrorException {
+        ResultSet resultSet = executeSql(ddlSql);
+        if(resultSet.isSucceeded()) {
+            return true;
         }
+
+        log.error("nebula schema操作异常 code:{}, msg:{}, nGql:{} ",
+                resultSet.getErrorCode(), resultSet.getErrorMessage(), ddlSql);
+        throw new NebulaExecuteException(resultSet.getErrorCode(), resultSet.getErrorMessage());
     }
 
     @Override
