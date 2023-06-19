@@ -11,7 +11,8 @@ import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleExceptio
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NotValidConnectionException;
 import io.github.anyzm.graph.ocean.domain.GraphQuery;
-import io.github.anyzm.graph.ocean.domain.GraphSpace;
+import io.github.anyzm.graph.ocean.domain.impl.GraphSpace;
+import io.github.anyzm.graph.ocean.domain.impl.GraphSpaceStatistic;
 import io.github.anyzm.graph.ocean.domain.impl.QueryResult;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
 import io.github.anyzm.graph.ocean.exception.NebulaExecuteException;
@@ -274,4 +275,13 @@ public interface GraphMapper {
      * @throws NebulaExecuteException
      */
     public boolean dropSpace(String spaceName) throws NebulaExecuteException;
+
+    /**
+     * 统计图空间的数据
+     * 实时统计，执行时间可能较长
+     * @param spaceName
+     * @return
+     * @throws NebulaExecuteException
+     */
+    public GraphSpaceStatistic statsSpace(String spaceName) throws NebulaExecuteException;
 }

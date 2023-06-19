@@ -2,8 +2,8 @@ package io.github.anyzm.graph.ocean.engine;
 
 import io.github.anyzm.graph.ocean.dao.GraphTypeManager;
 import io.github.anyzm.graph.ocean.domain.GraphLabel;
-import io.github.anyzm.graph.ocean.domain.GraphSpace;
 import io.github.anyzm.graph.ocean.domain.impl.GraphEdgeType;
+import io.github.anyzm.graph.ocean.domain.impl.GraphSpace;
 import io.github.anyzm.graph.ocean.domain.impl.GraphVertexType;
 import io.github.anyzm.graph.ocean.enums.ErrorEnum;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
@@ -18,7 +18,7 @@ public class NebulaSchemaManager {
     private static final String SQL_CREATE_SPACE = "CREATE SPACE IF NOT EXISTS `%s` " +
             "(partition_num = %d, replica_factor = %d, vid_type = %s);";
     private static final String SQL_CLONE_SPACE = "CREATE SPACE IF NOT EXISTS `%s` as `%s`;";
-    private static final String SQL_CLEAR_SPACE = "CLEAR SPACE IF EXISTS `%s`;submit job compact;";
+    private static final String SQL_CLEAR_SPACE = "CLEAR SPACE IF EXISTS `%s`;use `%s`;submit job compact;";
     private static final String SQL_DROP_SPACE = "DROP SPACE IF EXISTS `%s`;";
 
     private static final String SQL_CREATE_TAG = "CREATE TAG IF NOT EXISTS `%s` (%s) COMMENT = \"%s\"";
@@ -26,6 +26,12 @@ public class NebulaSchemaManager {
 
     private static final String SQL_CREATE_TAG_INDEX = "CREATE TAG INDEX IF NOT EXISTS `idx_%s` on `%s`()";
     private static final String SQL_CREATE_EDGE_INDEX = "CREATE EDGE INDEX IF NOT EXISTS `idx_%s` on `%s`()";
+
+    public static final String SQL_SUBMIT_JOB_STATS = "SUBMIT JOB STATS";
+
+    public static final String SQL_SHOW_JOB_ID = "SHOW JOB %d";
+
+    public static final String SQL_SHOW_STATS = "SHOW STATS";
 
     @Setter
     private static GraphTypeManager graphTypeManager;
@@ -40,7 +46,7 @@ public class NebulaSchemaManager {
     }
 
     public static String buildClearSpaceSql(String spaceName) {
-        return String.format(SQL_CLEAR_SPACE, spaceName);
+        return String.format(SQL_CLEAR_SPACE, spaceName, spaceName);
     }
 
     public static String buildDropSpaceSql(String spaceName) {

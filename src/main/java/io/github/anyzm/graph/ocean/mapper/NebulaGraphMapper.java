@@ -7,6 +7,7 @@ package io.github.anyzm.graph.ocean.mapper;
 
 import com.google.common.collect.Lists;
 import com.vesoft.nebula.ErrorCode;
+import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
@@ -16,7 +17,10 @@ import io.github.anyzm.graph.ocean.dao.*;
 import io.github.anyzm.graph.ocean.dao.impl.DefaultGraphEdgeEntityFactory;
 import io.github.anyzm.graph.ocean.dao.impl.DefaultGraphTypeManager;
 import io.github.anyzm.graph.ocean.dao.impl.DefaultGraphVertexEntityFactory;
-import io.github.anyzm.graph.ocean.domain.*;
+import io.github.anyzm.graph.ocean.domain.EdgeQuery;
+import io.github.anyzm.graph.ocean.domain.GraphLabel;
+import io.github.anyzm.graph.ocean.domain.GraphQuery;
+import io.github.anyzm.graph.ocean.domain.VertexQuery;
 import io.github.anyzm.graph.ocean.domain.impl.*;
 import io.github.anyzm.graph.ocean.engine.*;
 import io.github.anyzm.graph.ocean.enums.EdgeDirectionEnum;
@@ -29,6 +33,7 @@ import io.github.anyzm.graph.ocean.session.NebulaSessionWrapper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -340,6 +345,58 @@ public class NebulaGraphMapper implements GraphMapper {
     public boolean dropSpace(String spaceName) throws NebulaExecuteException {
         String sql = NebulaSchemaManager.buildDropSpaceSql(spaceName);
         return executeSchemaSql(sql);
+    }
+
+    @Override
+    public GraphSpaceStatistic statsSpace(String spaceName) throws NebulaExecuteException {
+        try {
+            // 先提交stats job获取最新数据
+            QueryResult queryResult = executeQuerySql(NebulaSchemaManager.SQL_SUBMIT_JOB_STATS);
+            long jobId = queryResult.getData().get(0).get(0).asLong();
+
+            // 查询job是否已完成
+            String jobSql = String.format(NebulaSchemaManager.SQL_SHOW_JOB_ID, jobId);
+            do {
+                // 等待10s
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+
+                queryResult = executeQuerySql(jobSql);
+                String jobStatus = queryResult.getData().get(0).get("Status").asString();
+                if(StringUtils.equals(jobStatus, "FINISHED")) {
+                    break;
+                }
+            }while (true);
+
+            GraphSpaceStatistic statistic = new GraphSpaceStatistic();
+            queryResult = executeQuerySql(NebulaSchemaManager.SQL_SHOW_STATS);
+            for(ResultSet.Record record : queryResult.getData()) {
+                String type = record.get("Type").asString();
+                String name = record.get("Name").asString();
+                long count = record.get("Count").asLong();
+                if(StringUtils.equalsIgnoreCase(type, "Tag")) {
+                    statistic.getVertexMap().put(name, count);
+                }else if(StringUtils.equalsIgnoreCase(type, "Edge")) {
+                    statistic.getEdgeMap().put(name, count);
+                }else if(StringUtils.equalsIgnoreCase(type, "Space")) {
+                    if(StringUtils.equalsIgnoreCase(name, "vertices")) {
+                        statistic.setVertexCount(count);
+                    }else if(StringUtils.equalsIgnoreCase(name, "edges")) {
+                        statistic.setEdgeCount(count);
+                    }
+                }
+            }
+            return statistic;
+        } catch (IOErrorException|ClientServerIncompatibleException|NotValidConnectionException e) {
+            throw new NebulaExecuteException(ErrorCode.E_RPC_FAILURE.getValue(), e.getMessage(), e);
+        } catch (AuthFailedException e) {
+            throw new NebulaExecuteException(ErrorCode.E_PRIVILEGE_ACTION_INVALID.getValue(), e.getMessage(), e);
+        } catch (UnsupportedEncodingException e) {
+            throw new NebulaExecuteException(ErrorEnum.DATA_TYPE_CONVERT_ERROR);
+        }
     }
 
     /**

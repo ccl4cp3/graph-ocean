@@ -1,4 +1,4 @@
-package io.github.anyzm.graph.ocean.domain;
+package io.github.anyzm.graph.ocean.domain.impl;
 
 import lombok.Data;
 

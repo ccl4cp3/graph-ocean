@@ -45,8 +45,9 @@ public enum ErrorEnum implements ResponseService {
 
     INVALID_VERTEX_TAG("016", "非法的顶点类型或者顶点类型为空"),
 
-    SYSTEM_ERROR("999", "系统繁忙"),
+    DATA_TYPE_CONVERT_ERROR("017", "数据类型转换错误"),
 
+    SYSTEM_ERROR("999", "系统繁忙"),
     ;
 
     private String code;
