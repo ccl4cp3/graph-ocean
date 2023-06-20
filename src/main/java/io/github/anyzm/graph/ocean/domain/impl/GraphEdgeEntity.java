@@ -10,6 +10,7 @@ import io.github.anyzm.graph.ocean.domain.GraphRelation;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +23,10 @@ import java.util.Map;
 @Getter
 @ToString
 public class GraphEdgeEntity<E> extends GraphPropertyEntity implements GraphRelation {
+    /**
+     * 边名称
+     */
+    private final String edgeName;
     /**
      * 起点 id
      */
@@ -43,7 +48,7 @@ public class GraphEdgeEntity<E> extends GraphPropertyEntity implements GraphRela
     public int getHashCode() {
         String startId = this.getSrcId();
         String endId = this.getDstId();
-        String edgeName = this.graphEdgeType.getEdgeName();
+        String edgeName = this.getEdgeName();
         return Objects.hashCode(startId, endId, edgeName);
     }
 
@@ -59,15 +64,21 @@ public class GraphEdgeEntity<E> extends GraphPropertyEntity implements GraphRela
 
         String startId = this.getSrcId();
         String endId = this.getDstId();
-        String edgeName = this.graphEdgeType.getEdgeName();
+        String edgeName = this.getEdgeName();
         return startId.equals(graphEdgeEntity.getSrcId()) &&
                 endId.equals(graphEdgeEntity.getDstId())
-                && edgeName.equals(graphEdgeEntity.getGraphEdgeType().getEdgeName());
+                && edgeName.equals(graphEdgeEntity.getEdgeName());
     }
 
     public GraphEdgeEntity(GraphEdgeType<E> graphEdgeType, String srcId, String dstId, Map<String, Object> props) {
         super(props);
         this.graphEdgeType = graphEdgeType;
+        // 优先使用类注解的值
+        if(StringUtils.isNotBlank(this.graphEdgeType.getEdgeName())) {
+            this.edgeName = this.graphEdgeType.getEdgeName();
+        }else {
+            this.edgeName = (String) props.remove(this.graphEdgeType.getTypeField());
+        }
         this.srcId = srcId;
         this.dstId = dstId;
     }
@@ -75,6 +86,7 @@ public class GraphEdgeEntity<E> extends GraphPropertyEntity implements GraphRela
     public GraphEdgeEntity(GraphEdgeType<E> graphEdgeType, String srcId, String dstId) {
         super(Collections.emptyMap());
         this.graphEdgeType = graphEdgeType;
+        this.edgeName = this.graphEdgeType.getEdgeName();
         this.srcId = srcId;
         this.dstId = dstId;
     }

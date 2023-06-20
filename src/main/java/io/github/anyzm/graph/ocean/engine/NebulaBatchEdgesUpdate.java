@@ -121,14 +121,18 @@ public class NebulaBatchEdgesUpdate<S,D,E> implements EdgeUpdateEngine<E> {
                 continue;
             }
 
-            if (GraphDataTypeEnum.STRING == graphDataTypeEnum || GraphDataTypeEnum.FIXED_STRING == graphDataTypeEnum) {
-                sqlBuilder.append(",").append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
-            } else {
-                sqlBuilder.append(",").append(entry.getKey()).append("=").append(entry.getValue());
+            switch (graphDataTypeEnum) {
+                case STRING:
+                case FIXED_STRING:
+                    sqlBuilder.append(",").append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
+                    break;
+                default:
+                    sqlBuilder.append(",").append(entry.getKey()).append("=").append(entry.getValue());
+                    break;
             }
         }
         String sqlFieldSet = sqlBuilder.delete(0, 1).toString();
-        return String.format(UPSET_SQL_FORMAT, graphEdgeEntity.getGraphEdgeType().getEdgeName(), src, end, sqlFieldSet);
+        return String.format(UPSET_SQL_FORMAT, graphEdgeEntity.getEdgeName(), src, end, sqlFieldSet);
     }
 
 

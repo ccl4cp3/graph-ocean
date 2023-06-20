@@ -55,6 +55,11 @@ public abstract class AbstractGraphLabel implements GraphLabel {
     protected Map<String, String> propertyCommentMap;
 
     /**
+     * 标签类型字段，用于动态设置顶点或边的名称
+     */
+    protected String typeField;
+
+    /**
      * 标签的注释
      */
     protected String comment;

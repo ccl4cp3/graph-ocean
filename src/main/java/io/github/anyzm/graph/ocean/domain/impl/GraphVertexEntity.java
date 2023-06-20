@@ -43,7 +43,7 @@ public class GraphVertexEntity<T> extends GraphPropertyEntity {
         if(StringUtils.isNotBlank(this.graphVertexType.getVertexName())) {
             this.vertexName = this.graphVertexType.getVertexName();
         }else {
-            this.vertexName = (String) props.remove(this.graphVertexType.getVertexField());
+            this.vertexName = (String) props.remove(this.graphVertexType.getTypeField());
         }
         this.id = id;
     }

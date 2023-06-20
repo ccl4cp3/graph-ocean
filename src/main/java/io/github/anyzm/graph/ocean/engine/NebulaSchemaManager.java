@@ -53,30 +53,37 @@ public class NebulaSchemaManager {
         return String.format(SQL_DROP_SPACE, spaceName);
     }
 
-    public static <E> String buildCreateEdgeIndexSql(Class<E> clazz) {
+    public static <E> String buildCreateEdgeIndexSql(Class<E> clazz, String edgeName) {
         GraphEdgeType<E> edgeType = graphTypeManager.getGraphEdgeType(clazz);
         if(null == edgeType) {
             throw new NebulaException(ErrorEnum.NOT_SUPPORT_EDGE_TAG);
         }
 
-        String edgeName = edgeType.getEdgeName();
+        // 优先使用注解上的值
+        if(StringUtils.isNotBlank(edgeType.getEdgeName())) {
+            edgeName = edgeType.getEdgeName();
+        }
 
         return String.format(SQL_CREATE_EDGE_INDEX, edgeName, edgeName);
     }
 
-    public static <E> String buildCreateEdgeSql(Class<E> clazz){
+    public static <E> String buildCreateEdgeSql(Class<E> clazz, String edgeName, String edgeComment){
         GraphEdgeType<E> edgeType = graphTypeManager.getGraphEdgeType(clazz);
         if(null == edgeType) {
             throw new NebulaException(ErrorEnum.NOT_SUPPORT_EDGE_TAG);
         }
 
         String propertySql = buildPropertySql(edgeType);
-        String edgeName = edgeType.getEdgeName();
-        // 默认
-        String edgeComment = edgeType.getComment();
-        if(StringUtils.isBlank(edgeComment)) {
+
+        // 优先使用注解上的值
+        if(StringUtils.isNotBlank(edgeType.getEdgeName())) {
+            edgeName = edgeType.getEdgeName();
             edgeComment = edgeName;
         }
+        if(StringUtils.isNotBlank(edgeType.getComment())) {
+            edgeComment = edgeType.getComment();
+        }
+
         return String.format(SQL_CREATE_EDGE, edgeName, propertySql, edgeComment);
     }
 

@@ -47,7 +47,7 @@ public class GraphEdgeTypeBuilder implements GraphLabelBuilder {
 
     @Override
     public GraphEdgeTypeBuilder graphLabelField(String graphLabelField) {
-        // 边类型暂时不支持动态设置
+        this.graphEdgeType.setTypeField(graphLabelField);
         return this;
     }
 

@@ -203,6 +203,14 @@ public interface GraphMapper {
      */
     public <T> T fetchVertexTag(T entity) throws UnsupportedEncodingException, IllegalAccessException, InstantiationException, ClientServerIncompatibleException, AuthFailedException, NotValidConnectionException, IOErrorException;
 
+    /**
+     * 创建tag
+     * @param space
+     * @param vertexClazz
+     * @return
+     * @param <T>
+     */
+    public <T> boolean createTag(String space, Class<T> vertexClazz) throws NebulaExecuteException;
 
     /**
      * 创建tag
@@ -225,6 +233,26 @@ public interface GraphMapper {
     public <E> boolean createEdge(String space, Class<E> edgeClazz) throws NebulaExecuteException;
 
     /**
+     * 创建edge
+     * @param space
+     * @param edgeClazz
+     * @param edgeName
+     * @param edgeComment
+     * @return
+     * @param <E>
+     */
+    public <E> boolean createEdge(String space, Class<E> edgeClazz, String edgeName, String edgeComment) throws NebulaExecuteException;
+
+    /**
+     * 创建tag index
+     * @param space
+     * @param vertexClazz
+     * @return
+     * @param <T>
+     */
+    public <T> boolean createTagIndex(String space, Class<T> vertexClazz) throws NebulaExecuteException;
+
+    /**
      * 创建tag index
      * @param space
      * @param vertexClazz
@@ -242,6 +270,16 @@ public interface GraphMapper {
      * @param <E>
      */
     public <E> boolean createEdgeIndex(String space, Class<E> edgeClazz) throws NebulaExecuteException;
+
+    /**
+     * 创建edge index
+     * @param space
+     * @param edgeClazz
+     * @param edgeName 
+     * @return
+     * @param <E>
+     */
+    public <E> boolean createEdgeIndex(String space, Class<E> edgeClazz, String edgeName) throws NebulaExecuteException;
 
     /**
      * 创建space

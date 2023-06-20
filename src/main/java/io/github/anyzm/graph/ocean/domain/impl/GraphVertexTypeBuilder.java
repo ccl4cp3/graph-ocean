@@ -47,7 +47,7 @@ public class GraphVertexTypeBuilder implements GraphLabelBuilder {
 
     @Override
     public GraphVertexTypeBuilder graphLabelField(String graphLabelField) {
-        this.graphVertexType.setVertexField(graphLabelField);
+        this.graphVertexType.setTypeField(graphLabelField);
         return this;
     }
 

@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 /**
  * Description  NebulaGraphMapper is used for
- *
+ * 注意：传参为clazz的均不支持动态标签类型
  * @author Anyzm
  * Date  2021/7/16 - 17:37
  * @version 1.0.0
@@ -296,6 +296,11 @@ public class NebulaGraphMapper implements GraphMapper {
     }
 
     @Override
+    public <T> boolean createTag(String space, Class<T> vertexClazz) throws NebulaExecuteException {
+        return createTag(space, vertexClazz, null, null);
+    }
+
+    @Override
     public <T> boolean createTag(String space, Class<T> vertexClazz, String tagName, String tagComment) throws NebulaExecuteException {
         String sql = NebulaSchemaManager.buildCreateTagSql(vertexClazz, tagName, tagComment);
         String schemaSql = String.format(SQL, space, sql);
@@ -304,9 +309,19 @@ public class NebulaGraphMapper implements GraphMapper {
 
     @Override
     public <E> boolean createEdge(String space, Class<E> edgeClazz) throws NebulaExecuteException {
-        String sql = NebulaSchemaManager.buildCreateEdgeSql(edgeClazz);
+        return createEdge(space, edgeClazz, null, null);
+    }
+
+    @Override
+    public <E> boolean createEdge(String space, Class<E> edgeClazz, String edgeName, String edgeComment) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildCreateEdgeSql(edgeClazz, edgeName, edgeComment);
         String schemaSql = String.format(SQL, space, sql);
         return executeSchemaSql(schemaSql);
+    }
+
+    @Override
+    public <T> boolean createTagIndex(String space, Class<T> vertexClazz) throws NebulaExecuteException {
+        return createTagIndex(space, vertexClazz, null);
     }
 
     @Override
@@ -318,7 +333,12 @@ public class NebulaGraphMapper implements GraphMapper {
 
     @Override
     public <E> boolean createEdgeIndex(String space, Class<E> edgeClazz) throws NebulaExecuteException {
-        String sql = NebulaSchemaManager.buildCreateEdgeIndexSql(edgeClazz);
+        return createEdgeIndex(space, edgeClazz, null);
+    }
+
+    @Override
+    public <E> boolean createEdgeIndex(String space, Class<E> edgeClazz, String edgeName) throws NebulaExecuteException {
+        String sql = NebulaSchemaManager.buildCreateEdgeIndexSql(edgeClazz, edgeName);
         String schemaSql = String.format(SQL, space, sql);
         return executeSchemaSql(schemaSql);
     }

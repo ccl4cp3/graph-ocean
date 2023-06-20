@@ -169,7 +169,7 @@ public class GraphHelper {
 
         GraphPropertyTypeEnum graphPropertyTypeEnum = graphProperty.propertyTypeEnum();
         switch (graphPropertyTypeEnum) {
-            case GRAPH_VERTEX_TYPE:
+            case GRAPH_LABEL_TYPE:
                 graphLabelBuilder.graphLabelField(value);
                 break;
             case GRAPH_VERTEX_ID:
