@@ -30,7 +30,7 @@ import java.util.Set;
  */
 public class NebulaBatchVertexUpdate<T> implements VertexUpdateEngine {
 
-    private static final String VERTEX_UPSET_SQL = "UPSERT VERTEX ON %s %s SET %s";
+    private static final String VERTEX_UPSET_SQL = "UPSERT VERTEX ON `%s` %s SET %s";
 
     private List<GraphVertexEntity<T>> graphVertexEntities;
 
@@ -80,7 +80,7 @@ public class NebulaBatchVertexUpdate<T> implements VertexUpdateEngine {
                 case STRING:
                 case FIXED_STRING:
                     builder.append(',').append(graphVertexEntity.getVertexName()).append('.')
-                            .append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
+                            .append(entry.getKey()).append("='").append(entry.getValue()).append("'");
                     break;
                 default:
                     builder.append(',').append(graphVertexEntity.getVertexName()).append('.')

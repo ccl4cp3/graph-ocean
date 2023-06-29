@@ -41,7 +41,7 @@ public enum ErrorEnum implements ResponseService {
 
     VERTEX_PROP_VALUE_SIZE_NOT_MATCH("014", "顶点属性名和值个数不匹配"),
 
-    INVALID_ID("015", "定点id非法或缺失"),
+    INVALID_ID("015", "顶点id非法或缺失"),
 
     INVALID_VERTEX_TAG("016", "非法的顶点类型或者顶点类型为空"),
 

@@ -39,7 +39,7 @@ import java.util.regex.Pattern;
  */
 @Log4j2
 public class GraphHelper {
-    private static String ENDPOINT_TEMPLATE = "%s(\"%s\")";
+    private static String ENDPOINT_TEMPLATE = "%s('%s')";
     private static String STRING_ID_TEMPLATE = "%s \"%s\" ";
     public static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[\n\t\"\'()<>/\\\\]");
 
@@ -65,7 +65,7 @@ public class GraphHelper {
         return timestamp.getTime() / 1000;
     }
 
-    private static String generateKeyPolicy(GraphKeyPolicy graphKeyPolicy, String vertexIdKey) {
+    public static String generateKeyPolicy(GraphKeyPolicy graphKeyPolicy, String vertexIdKey) {
         switch (graphKeyPolicy) {
             case string_key:
                 return String.format(STRING_ID_TEMPLATE, graphKeyPolicy.getKeyWrapWord(), vertexIdKey);

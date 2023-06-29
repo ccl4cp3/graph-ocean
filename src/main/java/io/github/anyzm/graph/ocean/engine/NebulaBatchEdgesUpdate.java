@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  */
 public class NebulaBatchEdgesUpdate<S,D,E> implements EdgeUpdateEngine<E> {
 
-    private static final String UPSET_SQL_FORMAT = "UPSERT EDGE ON %s %s -> %s SET %s";
+    private static final String UPSET_SQL_FORMAT = "UPSERT EDGE ON `%s` %s -> %s SET %s";
 
     private List<GraphEdgeEntity<E>> graphEdgeEntities;
 
@@ -124,7 +124,7 @@ public class NebulaBatchEdgesUpdate<S,D,E> implements EdgeUpdateEngine<E> {
             switch (graphDataTypeEnum) {
                 case STRING:
                 case FIXED_STRING:
-                    sqlBuilder.append(",").append(entry.getKey()).append("=\"").append(entry.getValue()).append("\"");
+                    sqlBuilder.append(",").append(entry.getKey()).append("='").append(entry.getValue()).append("'");
                     break;
                 default:
                     sqlBuilder.append(",").append(entry.getKey()).append("=").append(entry.getValue());
