@@ -14,6 +14,8 @@ import io.github.anyzm.graph.ocean.domain.GraphQuery;
 import io.github.anyzm.graph.ocean.domain.impl.GraphSpace;
 import io.github.anyzm.graph.ocean.domain.impl.GraphSpaceStatistic;
 import io.github.anyzm.graph.ocean.domain.impl.QueryResult;
+import io.github.anyzm.graph.ocean.domain.impl.SubGraphResult;
+import io.github.anyzm.graph.ocean.engine.NebulaSubGraphQuery;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
 import io.github.anyzm.graph.ocean.exception.NebulaExecuteException;
 
@@ -275,7 +277,7 @@ public interface GraphMapper {
      * 创建edge index
      * @param space
      * @param edgeClazz
-     * @param edgeName 
+     * @param edgeName
      * @return
      * @param <E>
      */
@@ -322,4 +324,12 @@ public interface GraphMapper {
      * @throws NebulaExecuteException
      */
     public GraphSpaceStatistic statsSpace(String spaceName) throws NebulaExecuteException;
+
+    /**
+     * 子图查询
+     * @param subGraphQuery
+     * @return
+     * @throws NebulaExecuteException
+     */
+    public SubGraphResult getSubGraph(NebulaSubGraphQuery subGraphQuery) throws NebulaExecuteException;
 }

@@ -7,7 +7,10 @@ package io.github.anyzm.graph.ocean.mapper;
 
 import com.google.common.collect.Lists;
 import com.vesoft.nebula.ErrorCode;
+import com.vesoft.nebula.client.graph.data.Node;
+import com.vesoft.nebula.client.graph.data.Relationship;
 import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
@@ -36,7 +39,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -415,6 +421,54 @@ public class NebulaGraphMapper implements GraphMapper {
         } catch (AuthFailedException e) {
             throw new NebulaExecuteException(ErrorCode.E_PRIVILEGE_ACTION_INVALID.getValue(), e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
+            throw new NebulaExecuteException(ErrorEnum.DATA_TYPE_CONVERT_ERROR);
+        }
+    }
+
+    @Override
+    public SubGraphResult getSubGraph(NebulaSubGraphQuery subGraphQuery) throws NebulaExecuteException{
+        try {
+            QueryResult queryResult = executeQuerySql(subGraphQuery.buildQuerySql());
+
+            List<ResultSet.Record> list = queryResult.getData();
+
+            // 去重
+            Set<Long> nodeIdList = new HashSet<>(list.size() * 8);
+            List<Node> nodeList = new ArrayList<>(list.size() * 8);
+            // 去重
+            Set<String> relationshipIdList = new HashSet<>(list.size() * 8);
+            List<Relationship> relationshipList = new ArrayList<>(list.size() * 8);
+
+            for(ResultSet.Record item : list) {
+                if(item.contains("nodes")) {
+                    List<ValueWrapper> vertexList = item.get("nodes").asList();
+                    for(ValueWrapper valueWrapper : vertexList) {
+                        Node node = valueWrapper.asNode();
+                        // 标签没有顶点不存在
+                        if(CollectionUtils.isEmpty(node.tagNames())) {
+                            continue;
+                        }
+                        if(nodeIdList.add(node.getId().asLong())) {
+                            nodeList.add(node);
+                        }
+                    }
+                }
+
+                List<ValueWrapper> edgeList = item.get("relationships").asList();
+                for(ValueWrapper valueWrapper : edgeList) {
+                    Relationship relationship = valueWrapper.asRelationship();
+                    if(relationshipIdList.add(relationship.srcId().asLong() + relationship.edgeName() + relationship.dstId().asLong())) {
+                        relationshipList.add(relationship);
+                    }
+                }
+            }
+
+            return new SubGraphResult(nodeList, relationshipList);
+        } catch (IOErrorException|ClientServerIncompatibleException|NotValidConnectionException e) {
+            throw new NebulaExecuteException(ErrorCode.E_RPC_FAILURE.getValue(), e.getMessage(), e);
+        } catch (AuthFailedException e) {
+            throw new NebulaExecuteException(ErrorCode.E_PRIVILEGE_ACTION_INVALID.getValue(), e.getMessage(), e);
+        }catch (UnsupportedEncodingException e) {
             throw new NebulaExecuteException(ErrorEnum.DATA_TYPE_CONVERT_ERROR);
         }
     }
