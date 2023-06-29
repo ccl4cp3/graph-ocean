@@ -11,10 +11,8 @@ import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleExceptio
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NotValidConnectionException;
 import io.github.anyzm.graph.ocean.domain.GraphQuery;
-import io.github.anyzm.graph.ocean.domain.impl.GraphSpace;
-import io.github.anyzm.graph.ocean.domain.impl.GraphSpaceStatistic;
-import io.github.anyzm.graph.ocean.domain.impl.QueryResult;
-import io.github.anyzm.graph.ocean.domain.impl.SubGraphResult;
+import io.github.anyzm.graph.ocean.domain.impl.*;
+import io.github.anyzm.graph.ocean.engine.NebulaPathQuery;
 import io.github.anyzm.graph.ocean.engine.NebulaSubGraphQuery;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
 import io.github.anyzm.graph.ocean.exception.NebulaExecuteException;
@@ -332,4 +330,12 @@ public interface GraphMapper {
      * @throws NebulaExecuteException
      */
     public SubGraphResult getSubGraph(NebulaSubGraphQuery subGraphQuery) throws NebulaExecuteException;
+
+    /**
+     * 路径查询
+     * @param pathQuery
+     * @return
+     * @throws NebulaExecuteException
+     */
+    public PathResult getPath(NebulaPathQuery pathQuery) throws NebulaExecuteException;
 }

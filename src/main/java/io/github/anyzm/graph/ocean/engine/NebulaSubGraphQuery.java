@@ -42,7 +42,7 @@ public class NebulaSubGraphQuery {
     private boolean onlyEdge = false;
 
     /**
-     * 起始点VID列表
+     * 起点VID列表
      */
     private List<String> startVidList;
 

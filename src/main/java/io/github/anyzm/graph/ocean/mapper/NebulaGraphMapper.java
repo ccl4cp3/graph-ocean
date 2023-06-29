@@ -7,10 +7,7 @@ package io.github.anyzm.graph.ocean.mapper;
 
 import com.google.common.collect.Lists;
 import com.vesoft.nebula.ErrorCode;
-import com.vesoft.nebula.client.graph.data.Node;
-import com.vesoft.nebula.client.graph.data.Relationship;
-import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.data.ValueWrapper;
+import com.vesoft.nebula.client.graph.data.*;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
@@ -464,6 +461,26 @@ public class NebulaGraphMapper implements GraphMapper {
             }
 
             return new SubGraphResult(nodeList, relationshipList);
+        } catch (IOErrorException|ClientServerIncompatibleException|NotValidConnectionException e) {
+            throw new NebulaExecuteException(ErrorCode.E_RPC_FAILURE.getValue(), e.getMessage(), e);
+        } catch (AuthFailedException e) {
+            throw new NebulaExecuteException(ErrorCode.E_PRIVILEGE_ACTION_INVALID.getValue(), e.getMessage(), e);
+        }catch (UnsupportedEncodingException e) {
+            throw new NebulaExecuteException(ErrorEnum.DATA_TYPE_CONVERT_ERROR);
+        }
+    }
+
+    @Override
+    public PathResult getPath(NebulaPathQuery pathQuery) throws NebulaExecuteException {
+        try {
+            QueryResult queryResult = executeQuerySql(pathQuery.buildQuerySql());
+
+            List<ResultSet.Record> list = queryResult.getData();
+            List<PathWrapper> pathList = new ArrayList<>(list.size());
+            for(ResultSet.Record item : list) {
+                pathList.add(item.get("p").asPath());
+            }
+            return new PathResult(pathList);
         } catch (IOErrorException|ClientServerIncompatibleException|NotValidConnectionException e) {
             throw new NebulaExecuteException(ErrorCode.E_RPC_FAILURE.getValue(), e.getMessage(), e);
         } catch (AuthFailedException e) {
