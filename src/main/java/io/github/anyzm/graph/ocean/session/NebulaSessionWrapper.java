@@ -54,7 +54,7 @@ public class NebulaSessionWrapper implements NebulaSession {
             throw new NebulaExecuteException(resultSet.getErrorCode(), resultSet.getErrorMessage());
         } catch (Exception e) {
             log.error("nebula更新异常 Thrift rpc call failed: {}", e.getMessage());
-            throw new NebulaExecuteException(ErrorEnum.UPDATE_NEBULA_EROR, e);
+            throw new NebulaExecuteException(ErrorEnum.UPDATE_NEBULA_EROR.getResponseCode(), e.getMessage(), e);
         }
     }
 
@@ -76,7 +76,7 @@ public class NebulaSessionWrapper implements NebulaSession {
                     .collect(Collectors.toList()));
         } catch (Exception e) {
             log.error("nebula查询异常 code:{}, msg:{}, nGql:{} ", ErrorCode.E_RPC_FAILURE, e.getMessage(), querySql);
-            throw new NebulaExecuteException(ErrorEnum.QUERY_NEBULA_EROR, e);
+            throw new NebulaExecuteException(ErrorEnum.QUERY_NEBULA_EROR.getResponseCode(), e.getMessage(), e);
         }
     }
 

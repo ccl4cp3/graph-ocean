@@ -53,7 +53,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class NebulaGraphMapper implements GraphMapper {
 
-    private static final int BATCH_SIZE = 500;
+    // 经测试边最多只能一次插入255条
+    private static final int BATCH_SIZE = 255;
 
     private static final String SQL = "use %s ; %s;";
 
@@ -425,7 +426,9 @@ public class NebulaGraphMapper implements GraphMapper {
     @Override
     public SubGraphResult getSubGraph(NebulaSubGraphQuery subGraphQuery) throws NebulaExecuteException{
         try {
-            QueryResult queryResult = executeQuerySql(subGraphQuery.buildQuerySql());
+            String sql = subGraphQuery.buildQuerySql();
+            log.info("子图查询SQL: {}", sql);
+            QueryResult queryResult = executeQuerySql(sql);
 
             List<ResultSet.Record> list = queryResult.getData();
 
@@ -473,7 +476,9 @@ public class NebulaGraphMapper implements GraphMapper {
     @Override
     public PathResult getPath(NebulaPathQuery pathQuery) throws NebulaExecuteException {
         try {
-            QueryResult queryResult = executeQuerySql(pathQuery.buildQuerySql());
+            String sql = pathQuery.buildQuerySql();
+            log.info("路径查询SQL: {}", sql);
+            QueryResult queryResult = executeQuerySql(sql);
 
             List<ResultSet.Record> list = queryResult.getData();
             List<PathWrapper> pathList = new ArrayList<>(list.size());
