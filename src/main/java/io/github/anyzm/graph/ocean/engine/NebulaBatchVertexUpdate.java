@@ -62,7 +62,7 @@ public class NebulaBatchVertexUpdate<T> implements VertexUpdateEngine {
             String sql = generateUpsetSql(graphVertexEntity);
             sqlList.add(sql);
         }
-        return StringUtil.aggregate(sqlList, batchSize, ";");
+        return sqlList;
     }
 
     private String generateUpsetSql(GraphVertexEntity graphVertexEntity) throws NebulaException {

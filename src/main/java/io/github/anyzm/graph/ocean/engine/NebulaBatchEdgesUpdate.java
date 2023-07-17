@@ -106,7 +106,7 @@ public class NebulaBatchEdgesUpdate<S,D,E> implements EdgeUpdateEngine<E> {
             String sql = generateSql(graphEdgeEntity);
             sqlList.add(sql);
         }
-        return StringUtil.aggregate(sqlList, sqlList.size(), ";");
+        return sqlList;
     }
 
     private String generateSql(GraphEdgeEntity<E> graphEdgeEntity) throws NebulaException {
