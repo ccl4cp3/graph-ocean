@@ -27,7 +27,10 @@ public enum GraphKeyPolicy {
      * 字符串id
      */
     string_key(""),
-
+    /**
+     * INT64 id
+     */
+    int_64(""),
     ;
 
     @Getter

@@ -3,14 +3,17 @@ package io.github.anyzm.graph.ocean.engine;
 import io.github.anyzm.graph.ocean.common.GraphHelper;
 import io.github.anyzm.graph.ocean.common.utils.CollectionUtils;
 import io.github.anyzm.graph.ocean.domain.GraphCondition;
+import io.github.anyzm.graph.ocean.enums.EdgeDirectionEnum;
 import io.github.anyzm.graph.ocean.enums.ErrorEnum;
 import io.github.anyzm.graph.ocean.enums.GraphKeyPolicy;
 import io.github.anyzm.graph.ocean.exception.NebulaException;
 import lombok.Setter;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 子图查询
@@ -40,6 +43,12 @@ public class NebulaSubGraphQuery {
      */
     @Setter
     private boolean onlyEdge = false;
+
+    /**
+     * 边方向map
+     */
+    @Setter
+    private Map<EdgeDirectionEnum, List<String>> edgeDirectionMap;
 
     /**
      * 起点VID列表
@@ -78,6 +87,21 @@ public class NebulaSubGraphQuery {
         }
         sqlBuilder.append(stepCount).append(" STEPS ");
         sqlBuilder.append("FROM ").append(StringUtils.join(startVidList, ","));
+        // 指定边类型的方向，顺序必须是IN->OUT->BOTH
+        if (MapUtils.isNotEmpty(edgeDirectionMap)) {
+            List<String> inEdgeTypeList = edgeDirectionMap.get(EdgeDirectionEnum.IN_COMING);
+            if(CollectionUtils.isNotEmpty(inEdgeTypeList)) {
+                sqlBuilder.append(" ").append(EdgeDirectionEnum.IN_COMING.getWord()).append(" ").append(StringUtils.join(inEdgeTypeList, ","));
+            }
+            List<String> outEdgeTypeList = edgeDirectionMap.get(EdgeDirectionEnum.OUT_GOING);
+            if(CollectionUtils.isNotEmpty(outEdgeTypeList)) {
+                sqlBuilder.append(" ").append(EdgeDirectionEnum.OUT_GOING.getWord()).append(" ").append(StringUtils.join(outEdgeTypeList, ","));
+            }
+            List<String> bothEdgeTypeList = edgeDirectionMap.get(EdgeDirectionEnum.BOTH);
+            if(CollectionUtils.isNotEmpty(bothEdgeTypeList)) {
+                sqlBuilder.append(" ").append(EdgeDirectionEnum.BOTH.getWord()).append(" ").append(StringUtils.join(bothEdgeTypeList, ","));
+            }
+        }
         if(null != graphCondition) {
             NebulaQueryUtils.where(sqlBuilder, graphCondition);
         }

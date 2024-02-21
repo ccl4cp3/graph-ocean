@@ -73,6 +73,8 @@ public class GraphHelper {
                 return String.format(ENDPOINT_TEMPLATE, graphKeyPolicy.getKeyWrapWord(), vertexIdKey);
             case uuid:
                 return UUID.randomUUID().toString();
+            case int_64:
+                return vertexIdKey;
             default:
                 return null;
         }

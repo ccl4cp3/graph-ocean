@@ -17,17 +17,25 @@ import lombok.Getter;
 public enum EdgeDirectionEnum {
 
     /**
+     * 入边，默认值
+     */
+    IN_COMING("IN"),
+    /**
      * 出边，默认值
      */
-    OUT_GOING(""),
+    OUT_GOING("OUT"),
     /**
-     * 反向，逆向查询
+     * 反向，逆向查询，用于GO语句
      */
     REVERSELY("REVERSELY"),
     /**
-     * 双向，双向查询
+     * 双向，双向查询，用于GO语句
      */
     BIDIRECT("BIDIRECT"),
+    /**
+     * 双向，双向查询，用于SUBGRAPH语句
+     */
+    BOTH("BOTH"),
     ;
 
     @Getter
@@ -36,5 +44,4 @@ public enum EdgeDirectionEnum {
     EdgeDirectionEnum(String word) {
         this.word = word;
     }
-
 }
