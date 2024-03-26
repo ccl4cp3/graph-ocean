@@ -15,7 +15,7 @@ public class FieldUtils {
         List<Field> fieldsList = new ArrayList<>();
         Class<?> c = clazz;
         while (!Object.class.equals(c)) {  // 遍历所有父类字节码对象
-            Field[] declaredFields = clazz.getDeclaredFields();
+            Field[] declaredFields = c.getDeclaredFields();
             fieldsList.addAll(Arrays.asList(declaredFields));
             c = c.getSuperclass();
         }
